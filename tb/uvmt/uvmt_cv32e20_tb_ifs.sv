@@ -58,20 +58,20 @@ interface uvmt_cv32e20_clk_gen_if (output logic core_clock, output logic core_re
          end
       join_none
    end
-   
+
    /**
     * Sets clock period in ps.
     */
    function static void set_clk_period ( real clk_period );
       core_clock_period = clk_period * 1ps;
    endfunction : set_clk_period
-   
+
    /** Triggers the generation of clk. */
    function static void start();
       start_clk = 1;
       `uvm_info("CLK_GEN_IF", "uvmt_cv32e20_clk_gen_if.start() called", UVM_NONE)
    endfunction : start
-   
+
 endinterface : uvmt_cv32e20_clk_gen_if
 
 /**
@@ -91,140 +91,6 @@ interface uvmt_cv32e20_vp_status_if (
   end
 
 endinterface : uvmt_cv32e20_vp_status_if
-
-
-/**
- * Quasi-static core control signals.
- */
-interface uvmt_cv32e20_core_cntrl_if (
-                                    input               clk,
-                                    output logic        fetch_en,
-                                    // quasi static values
-                                    output logic        pulp_clock_en,
-                                    output logic        scan_cg_en,
-                                    output logic [31:0] boot_addr,
-                                    output logic [31:0] mtvec_addr,
-                                    output logic [31:0] dm_halt_addr,
-                                    output logic [31:0] dm_exception_addr,
-                                    output logic [31:0] hart_id,
-                                    // To be driven by future debug module (DM)
-                                    output logic        debug_req,
-                                    // Testcase asserts this to load memory (not really a core control signal)
-                                    output logic        load_instr_mem
-                                  );
-
-  import uvm_pkg::*;
-
-  string       qsc_stat_str; //Quasi Static Control Status
-  wire         fb;
-  reg          lfsr_reset;
-  reg   [15:0] lfsr;
-
-  covergroup core_cntrl_cg;
-    boot_address: coverpoint boot_addr {
-      bins low  = {[32'h0000_0000 : 32'h0000_FFFF]};
-      bins med  = {[32'h0001_0000 : 32'hEFFF_FFFF]};
-      bins high = {[32'hF000_0000 : 32'hFFFF_FFFF]};
-    }
-    mtvec_address: coverpoint mtvec_addr {
-      bins low  = {[32'h0000_0000 : 32'h0000_FFFF]};
-      bins med  = {[32'h0001_0000 : 32'hEFFF_FFFF]};
-      bins high = {[32'hF000_0000 : 32'hFFFF_FFFF]};
-    }
-    debug_module_halt_address: coverpoint dm_halt_addr {
-      bins low  = {[32'h0000_0000 : 32'h0000_FFFF]};
-      bins med  = {[32'h0001_0000 : 32'hEFFF_FFFF]};
-      bins high = {[32'hF000_0000 : 32'hFFFF_FFFF]};
-    }
-    debug_module_exception_address: coverpoint dm_exception_addr {
-      bins low  = {[32'h0000_0000 : 32'h0000_FFFF]};
-      bins med  = {[32'h0001_0000 : 32'hEFFF_FFFF]};
-      bins high = {[32'hF000_0000 : 32'hFFFF_FFFF]};
-    }
-    hart_id: coverpoint hart_id {
-      bins low  = {[32'h0000_0000 : 32'h0000_FFFF]};
-      bins med  = {[32'h0001_0000 : 32'hEFFF_FFFF]};
-      bins high = {[32'hF000_0000 : 32'hFFFF_FFFF]};
-    }
-  endgroup: core_cntrl_cg
-
-  core_cntrl_cg core_cntrl_cg_inst = new();
-
-  // TODO: randomize hart_id (should have no affect?).
-  //       randomize boot_addr and mtvec addr (need to sync with the start address of the test program.
-  initial begin: quasi_static_controls
-
-
-    lfsr_reset        = 1'b1;
-    fetch_en          = 1'b0; // Enabled by go_fetch(), below
-    debug_req         = 1'b0;
-    pulp_clock_en     = 1'b0;
-    scan_cg_en        = 1'b0;
-    boot_addr         = 32'h0000_0080;
-    mtvec_addr        = 32'h0000_0000;
-    dm_halt_addr      = 32'h1A11_0800;
-    dm_exception_addr = 32'h1A11_1000;
-    hart_id           = 32'h0000_0000;
-
-    // If a override is provided via plusarg then set bootstrap pins and adjust ISS model
-    if ($value$plusargs("mtvec_addr=0x%x", mtvec_addr)) begin
-      string override;
-      int fh;
-
-      override = $sformatf("--override root/cpu/mtvec=0x%08x", {mtvec_addr[31:8], 8'h01});
-      fh = $fopen("ovpsim.ic", "a");      
-      $fwrite(fh, " %s\n", override);
-      $fclose(fh);
-    end
-
-    qsc_stat_str =                $sformatf("\tpulp_clock_en     = %0d\n", pulp_clock_en);
-    qsc_stat_str = {qsc_stat_str, $sformatf("\tscan_cg_en        = %0d\n", scan_cg_en)};
-    qsc_stat_str = {qsc_stat_str, $sformatf("\tboot_addr         = %8h\n", boot_addr)};
-    qsc_stat_str = {qsc_stat_str, $sformatf("\tmtvec_addr        = %8h\n", mtvec_addr)};
-    qsc_stat_str = {qsc_stat_str, $sformatf("\tdm_halt_addr      = %8h\n", dm_halt_addr)};
-    qsc_stat_str = {qsc_stat_str, $sformatf("\tdm_exception_addr = %8h\n", dm_exception_addr)};
-    qsc_stat_str = {qsc_stat_str, $sformatf("\thart_id           = %8h\n", hart_id)};
-
-    `uvm_info("CORE_CNTRL_IF", $sformatf("Quasi-static CORE control inputs:\n%s", qsc_stat_str), UVM_NONE)
-  end
-
-  clocking drv_cb @(posedge clk);
-    output fetch_en;
-  endclocking : drv_cb
-
-  /** Sets fetch_en to the core. */
-  //function void go_fetch();
-  task static go_fetch();
-    drv_cb.fetch_en <= 1'b1;
-    `uvm_info("CORE_CNTRL_IF", "uvmt_cv32e20_core_cntrl_if.go_fetch() called", UVM_DEBUG)
-    core_cntrl_cg_inst.sample();
-    repeat(10) @(posedge clk);
-    lfsr_reset <= 1'b0;
-  endtask : go_fetch
-
-  function void stop_fetch();
-    drv_cb.fetch_en <= 1'b0;
-    lfsr_reset      <= 1'b1;
-    `uvm_info("CORE_CNTRL_IF", "uvmt_cv32e20_core_cntrl_if.stop_fetch() called", UVM_DEBUG)
-  endfunction : stop_fetch
-
-  // LFSR used to "randomly" toggle fetch_en to show that
-  // the core ignores fetch_en after its initial assertion.
-  // TODO: Make this constrain-able by a testcase (and get rid of the
-  //       DVT_LINTER waiver.
-  assign fb = !(lfsr[15] ^ lfsr[13] ^ lfsr[12] ^ lfsr[10]);
-
-  always @(posedge clk) begin
-    if (lfsr_reset) begin // active high reset
-      lfsr <= $urandom(); //@DVT_LINTER_WAIVER "MT20210811_2" disable SVTB.29.1.3.1
-    end
-    else begin
-      lfsr <= {lfsr[14:0], fb};
-      drv_cb.fetch_en <= lfsr[15];
-    end 
-  end 
-
-endinterface : uvmt_cv32e20_core_cntrl_if
 
 /**
  * Core status signals.
@@ -267,8 +133,8 @@ interface uvmt_cv32e20_step_compare_if;
    } reg_t;
 
    event        ovp_cpu_valid;      // Indicate instruction successfully retired
-   event        ovp_cpu_trap;       // Indicate exception occured 
-   event        ovp_cpu_halt;       // Indicate exception occured 
+   event        ovp_cpu_trap;       // Indicate exception occured
+   event        ovp_cpu_halt;       // Indicate exception occured
    bit   [31:0] ovp_cpu_PCr;        // Was iss_wrap.cpu.PCr
    logic [31:0] ovp_cpu_GPR[32];
    bit          ovp_cpu_state_idle;
@@ -279,7 +145,7 @@ interface uvmt_cv32e20_step_compare_if;
    event        riscv_retire;       // Was riscv_core.riscv_tracer_i.retire
    event        riscv_trap;         // new event to indicate RTL took a trap
    event        riscv_halt;         // new event to indicate RTL took a halt
-   
+
    logic [31:0] insn_pc;
    logic [31:0][31:0] riscy_GPR;    // packed dimensions, register index by data width
    logic        deferint_prime;     // Stages deferint for the ISS deferint signal
@@ -334,7 +200,7 @@ interface uvmt_cv32e20_debug_cov_assert_if
     input         if_stage_instr_rvalid_i, // Instruction word is valid
     input  [31:0] if_stage_instr_rdata_i, // Instruction word data
 
-    // Instruction ID stage (determines executed instructions)  
+    // Instruction ID stage (determines executed instructions)
     input         id_stage_instr_valid_i, // instruction word is valid
     input  [31:0] id_stage_instr_rdata_i, // Instruction word data
     input         id_stage_is_compressed,
@@ -394,7 +260,7 @@ interface uvmt_cv32e20_debug_cov_assert_if
     input  branch_in_decode
 );
 
-  clocking mon_cb @(posedge clk_i);    
+  clocking mon_cb @(posedge clk_i);
     input #1step
     fetch_enable_i,
 
@@ -415,7 +281,7 @@ interface uvmt_cv32e20_debug_cov_assert_if
     illegal_insn_i,
     illegal_insn_q,
     ecall_insn_i,
-    boot_addr_i, 
+    boot_addr_i,
     debug_req_i,
     debug_mode_q,
     dcsr_q,

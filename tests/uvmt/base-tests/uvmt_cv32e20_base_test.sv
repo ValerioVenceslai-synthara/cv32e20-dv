@@ -44,7 +44,7 @@ class uvmt_cv32e20_base_test_c extends uvm_test;
 
    // Handles testbench interfaces
    virtual uvmt_cv32e20_vp_status_if    vp_status_vif;  // virtual peripheral status
-   virtual uvmt_cv32e20_core_cntrl_if   core_cntrl_vif; // control inputs to the core
+   virtual uvme_cv32e20_core_cntrl_if   core_cntrl_vif; // control inputs to the core
    virtual uvmt_cv32e20_step_compare_if step_compare_vif;
 
    // Default sequences
@@ -362,7 +362,7 @@ function void uvmt_cv32e20_base_test_c::retrieve_vifs();
       `uvm_info("VIF", $sformatf("Found vp_status_vif handle of type %s in uvm_config_db", $typename(vp_status_vif)), UVM_DEBUG)
    end
 
-   if (!uvm_config_db#(virtual uvmt_cv32e20_core_cntrl_if)::get(this, "", "core_cntrl_vif", core_cntrl_vif)) begin
+   if (!uvm_config_db#(virtual uvme_cv32e20_core_cntrl_if)::get(this, "", "core_cntrl_vif", core_cntrl_vif)) begin
       `uvm_fatal("VIF", $sformatf("Could not find core_cntrl_vif handle of type %s in uvm_config_db", $typename(core_cntrl_vif)))
    end
    else begin

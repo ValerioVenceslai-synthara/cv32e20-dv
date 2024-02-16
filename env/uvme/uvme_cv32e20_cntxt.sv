@@ -43,6 +43,7 @@ class uvme_cv32e20_cntxt_c extends uvm_object;
    uvma_debug_cntxt_c      debug_cntxt;
    uvma_obi_memory_cntxt_c obi_memory_instr_cntxt;
    uvma_obi_memory_cntxt_c obi_memory_data_cntxt;
+   uvma_rvfi_cntxt_c#(ILEN,XLEN)     rvfi_cntxt;
 
    // Memory modelling
    rand uvml_mem_c                   mem;

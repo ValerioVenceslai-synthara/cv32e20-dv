@@ -41,6 +41,12 @@ class uvmt_cv32e20_firmware_test_c extends uvmt_cv32e20_base_test_c;
     */
    extern function new(string name="uvmt_cv32e20_firmware_test", uvm_component parent=null);
 
+
+   /*
+   *  Override types with the UVM Factory
+   */
+   extern virtual function void build_phase(uvm_phase phase);
+
    /**
     *  Enable program execution, wait for completion.
     */
@@ -109,9 +115,6 @@ task uvmt_cv32e20_firmware_test_c::run_phase(uvm_phase phase);
    end
 
    phase.raise_objection(this);
-   @(posedge env_cntxt.clknrst_cntxt.vif.reset_n);
-   repeat (33) @(posedge env_cntxt.clknrst_cntxt.vif.clk);
-   core_cntrl_vif.go_fetch(); // Assert the Core's fetch_en
    `uvm_info("TEST", "Started RUN", UVM_NONE)
    // The firmware is expected to write exit status and pass/fail indication to the Virtual Peripheral
    wait (
@@ -138,6 +141,14 @@ task uvmt_cv32e20_firmware_test_c::reset_debug();
     debug_vseq.start(vsequencer);
 
 endtask
+
+function void uvmt_cv32e20_firmware_test_c::build_phase(uvm_phase phase);
+       super.build_phase(phase);
+
+       `uvm_info("firmware_test", "Overriding Reference Model with Spike", UVM_NONE)
+       set_type_override_by_type(uvmc_rvfi_reference_model::get_type(),uvmc_rvfi_spike::get_type());
+
+endfunction : build_phase
 
 task uvmt_cv32e20_firmware_test_c::bootset_debug();
     uvme_cv32e20_random_debug_bootset_c debug_vseq;
@@ -214,7 +225,6 @@ task uvmt_cv32e20_firmware_test_c::random_fetch_toggle();
     //@DVT_LINTER_WAIVER_END "MT20211214_4"
 
     repeat (fetch_deassert_cycles) @(core_cntrl_vif.drv_cb);
-    core_cntrl_vif.go_fetch();
   end
 
 endtask : random_fetch_toggle
