@@ -37,9 +37,13 @@ void set_status_pp(priv_e new_mode);
 
 void return_to_machine();
 
-void test_fail();
+inline void __attribute__ ((naked)) test_fail();
 
-void test_pass();
+inline void __attribute__ ((naked)) test_pass();
+
+inline void __attribute__ ((naked)) _test_fail();
+
+inline void __attribute__ ((naked)) _test_pass();
 
 #define BITS2SHIFT(mask) (mask & -mask)
 
@@ -67,22 +71,22 @@ void test_pass();
   })
 
 #define csr_clear(reg, bit)                                                    \
-  ({                                                                           \
+  {                                                                            \
     unsigned long __tmp;                                                       \
     asm volatile("csrrc %0, " #reg ", %1" : "=r"(__tmp) : "rK"(bit));          \
     __tmp;                                                                     \
-  })
+  }
 
 #define csr_clear_mask(reg, mask) csr_clear(reg, BITS2SHIFT(mask))
 
 #define csr_set_mask(reg, mask, value)                                         \
-  ({                                                                           \
+  {                                                                            \
     unsigned long __tmp = csr_read(reg);                                       \
     __tmp = __tmp & mask;                                                      \
     __tmp |= (value << BITS2SHIFT(mask));                                      \
     csr_write(reg, __tmp);                                                     \
     __tmp;                                                                     \
-  })
+  }
 
 #define rdtime() csr_read(time)
 #define rdcycle() csr_read(cycle)

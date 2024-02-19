@@ -38,6 +38,7 @@ package uvmt_cv32e20_pkg;
    import uvm_pkg::*;
    import uvme_cv32e20_pkg::*;
    import uvmc_rvfi_reference_model_pkg::*;
+   import uvma_core_cntrl_pkg::*;
    import uvml_hrtbt_pkg::*;
    import uvml_logs_pkg::*;
 

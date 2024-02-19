@@ -138,6 +138,10 @@ constraint cve2_riscv_cons {
       dm_exception_addr_valid == 1;
       nmi_addr_valid          == 1;
 
+      dram_valid              == 1;
+      dram_base               == 'h10000000;
+      dram_size               == 'hFFFF0000;
+
       fetch_initial_delay     == 30;
    }
 
@@ -177,7 +181,6 @@ constraint cve2_riscv_cons {
          obi_memory_instr_cfg.enabled  == 1;
          obi_memory_data_cfg.enabled   == 1;
          rvfi_cfg.enabled              == 1;
-         rvfi_cfg.csr_enabled          == 1;
          rvfi_cfg.intr_enabled         == 0;
          rvfi_cfg.unified_csr_vif      == 1;
       }
@@ -214,7 +217,7 @@ constraint cve2_riscv_cons {
       soft obi_memory_data_cfg.drv_slv_rvalid_fixed_latency      <= 3;
 
       rvfi_cfg.nret                      == 1;
-      rvfi_cfg.unified_exceptions        == 0;
+      rvfi_cfg.unified_exceptions        == 1;
 
       if (is_active == UVM_ACTIVE) {
          clknrst_cfg.is_active           == UVM_ACTIVE;
@@ -311,6 +314,9 @@ function void uvme_cv32e20_cfg_c::set_unsupported_csr_mask();
    // Remove unsupported CSRs for Embedded configuration
    unsupported_csr_mask[uvma_core_cntrl_pkg::MCOUNTINHIBIT] = 1;
    unsupported_csr_mask[uvma_core_cntrl_pkg::MTVAL] = 1;
+   unsupported_csr_mask[uvma_core_cntrl_pkg::MTVAL2] = 1;
+   unsupported_csr_mask[uvma_core_cntrl_pkg::MTINST] = 1;
+   unsupported_csr_mask[uvma_core_cntrl_pkg::MSTATUSH] = 1;
 
 endfunction : set_unsupported_csr_mask
 

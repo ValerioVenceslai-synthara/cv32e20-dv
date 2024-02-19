@@ -9,7 +9,6 @@
 
 .section .text.start
 .globl _start
-.section .text
 .type _start, @function
 
 
@@ -11306,7 +11305,7 @@ fast_exit:
                   sw a5,0(a0)
                   sw a5,0(a0)
 
-                  j test_pass
+                  j _test_pass
 
 init_machine_mode:
                   li x30, 0x1800
@@ -11366,7 +11365,7 @@ mmode_intr_vector_1:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_2:
                   csrrw x12, 0x340, x12
@@ -11407,7 +11406,7 @@ mmode_intr_vector_2:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_3:
                   csrrw x12, 0x340, x12
@@ -11448,7 +11447,7 @@ mmode_intr_vector_3:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_4:
                   csrrw x12, 0x340, x12
@@ -11489,7 +11488,7 @@ mmode_intr_vector_4:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_5:
                   csrrw x12, 0x340, x12
@@ -11530,7 +11529,7 @@ mmode_intr_vector_5:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_6:
                   csrrw x12, 0x340, x12
@@ -11571,7 +11570,7 @@ mmode_intr_vector_6:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_7:
                   csrrw x12, 0x340, x12
@@ -11612,7 +11611,7 @@ mmode_intr_vector_7:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_8:
                   csrrw x12, 0x340, x12
@@ -11653,7 +11652,7 @@ mmode_intr_vector_8:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_9:
                   csrrw x12, 0x340, x12
@@ -11694,7 +11693,7 @@ mmode_intr_vector_9:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_10:
                   csrrw x12, 0x340, x12
@@ -11735,7 +11734,7 @@ mmode_intr_vector_10:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_11:
                   csrrw x12, 0x340, x12
@@ -11776,7 +11775,7 @@ mmode_intr_vector_11:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_12:
                   csrrw x12, 0x340, x12
@@ -11817,7 +11816,7 @@ mmode_intr_vector_12:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_13:
                   csrrw x12, 0x340, x12
@@ -11858,7 +11857,7 @@ mmode_intr_vector_13:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_14:
                   csrrw x12, 0x340, x12
@@ -11899,7 +11898,7 @@ mmode_intr_vector_14:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 mmode_intr_vector_15:
                   csrrw x12, 0x340, x12
@@ -11940,7 +11939,7 @@ mmode_intr_vector_15:
                   srli x30, x30, 0x1f
                   beqz x30, 1f
                   j mmode_intr_handler
-                  1: j test_pass
+                  1: j _test_pass
 
 .align 8
 mtvec_handler:
@@ -12023,7 +12022,7 @@ mmode_exception_handler:
                   li x22, 0x2 # ILLEGAL_INSTRUCTION
                   beq x30, x22, illegal_instr_handler
                   csrr x22, 0x343 # MTVAL
-                  1: jal x1, test_pass
+                  1: jal x1, _test_pass
 
 ecall_handler:
                   la x30, _start

@@ -17,3 +17,7 @@ inline void set_status_pp(priv_e new_mode) {
 void test_fail() { exit(1); }
 
 void test_pass() { exit(0); }
+
+void _test_pass() { _exit(0); }
+
+void _test_fail() { _exit(1); }

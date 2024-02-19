@@ -117,7 +117,7 @@ module uvmt_cv32e20_tb;
                                 .rvfi_mem_wdata ( cv32e20_top_i.rvfi_mem_wdata),
                                 .rvfi_mem_wmask ( cv32e20_top_i.rvfi_mem_wmask)
                                 );
-  bind uvmt_cv32e20_dut_wrap
+        bind cve2_cs_registers
         uvma_rvfi_unified_csr_if#(4096,32) rvfi_csr_if(
                                 .clk            ( clknrst_if.clk),
                                 .reset_n        ( clknrst_if.reset_n)
@@ -341,7 +341,7 @@ module uvmt_cv32e20_tb;
      uvm_config_db#(virtual uvma_interrupt_if                )::set(.cntxt(null), .inst_name("*.env"),                        .field_name("intr_vif"),         .value(interrupt_if)                               );
      uvm_config_db#(virtual uvma_debug_if                    )::set(.cntxt(null), .inst_name("*.env"),                        .field_name("debug_vif"),        .value(debug_if)                                   );
      uvm_config_db#(virtual uvma_rvfi_instr_if               )::set(.cntxt(null), .inst_name("*.env.rvfi_agent"),             .field_name("instr_vif0"),       .value(dut_wrap.rvfi_instr_if)                     );
-     uvm_config_db#(virtual uvma_rvfi_unified_csr_if#(4096,32))::set(.cntxt(null), .inst_name("*.env.rvfi_agent"),             .field_name("csr_vif0"),       .value(dut_wrap.rvfi_csr_if)                       );
+     uvm_config_db#(virtual uvma_rvfi_unified_csr_if#(4096,32))::set(.cntxt(null), .inst_name("*.env.rvfi_agent"),             .field_name("csr_vif0"),        .value(dut_wrap.cv32e20_top_i.u_cve2_top.u_cve2_core.cs_registers_i.rvfi_csr_if));
      // TODO: fix this
      //uvm_config_db#(virtual RVVI_memory                      )::set(.cntxt(null), .inst_name("*.env"),                        .field_name("rvvi_memory_vif"),  .value(iss_wrap.ram.memory)                        );
 

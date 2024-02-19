@@ -74,7 +74,7 @@ int _execve(const char *name, char *const argv[], char *const env[]) {
   return 0;
 }
 
-void _exit(int exit_status) {
+void __attribute__ ((naked)) _exit(int exit_status) {
   tohost = (exit_status << 1) | 1;
 
   asm volatile("wfi");

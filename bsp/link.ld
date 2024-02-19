@@ -14,6 +14,8 @@ MEMORY
     ram (rwxai) : ORIGIN = 0x80000000, LENGTH = 0x400000
 }
 
+ENTRY(_start)
+
 SECTIONS
 {
 
