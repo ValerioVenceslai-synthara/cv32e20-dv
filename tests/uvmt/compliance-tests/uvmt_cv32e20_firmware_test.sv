@@ -146,7 +146,7 @@ function void uvmt_cv32e20_firmware_test_c::build_phase(uvm_phase phase);
        super.build_phase(phase);
 
        `uvm_info("firmware_test", "Overriding Reference Model with Spike", UVM_NONE)
-       set_type_override_by_type(uvmc_rvfi_reference_model::get_type(),uvmc_rvfi_spike::get_type());
+       set_type_override_by_type(uvmc_rvfi_reference_model#()::get_type(),uvmc_rvfi_spike#()::get_type());
 
 endfunction : build_phase
 
@@ -215,7 +215,6 @@ task uvmt_cv32e20_firmware_test_c::random_fetch_toggle();
       1: fetch_assert_cycles = $urandom_range(3, 1);
     endcase
     repeat (fetch_assert_cycles) @(core_cntrl_vif.drv_cb);
-    core_cntrl_vif.stop_fetch();
 
     // Randomly dessert for a random number of cycles
     randcase

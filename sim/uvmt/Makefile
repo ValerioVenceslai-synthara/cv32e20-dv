@@ -34,5 +34,13 @@ CV_SW_PREFIX         ?= " "
 
 CORE_DEFINES         = +define+CV32E20_RVFI+RVFI
 
+UVM_VERBOSITY        ?= UVM_LOW
+
+USER_RUN_FLAGS       ?= +scoreboard_enable=1 +UVM_VERBOSITY=$(UVM_VERBOSITY) +report_file=$(TEST).yaml
+
+COMPILE_SPIKE=YES
+
+ISS ?= SPIKE
+
 include ../ExternalRepos.mk
 include $(CORE_V_VERIF)/mk/uvmt/uvmt.mk

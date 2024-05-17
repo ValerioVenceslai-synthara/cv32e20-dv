@@ -187,6 +187,8 @@ function void uvme_cv32e20_env_c::build_phase(uvm_phase phase);
       cntxt.obi_memory_instr_cntxt.mem = cntxt.mem;
       cntxt.obi_memory_data_cntxt.mem  = cntxt.mem;
 
+      $value$plusargs("scoreboard_enable=%0h", cfg.scoreboard_enabled);
+
       retrieve_vifs        ();
       assign_cfg           ();
       assign_cntxt         ();
@@ -265,13 +267,13 @@ task uvme_cv32e20_env_c::run_phase(uvm_phase phase);
             // FIXME:strichmo:When RVVI/RVFI ported, the core-specific random number sequence is no longer needed
             // Use this one instead:
             //void'(data_slv_seq.register_vp_vseq("vp_rand_num", 32'h1500_1000, 1, uvma_obi_memory_vp_rand_num_seq_c::get_type()));
-            begin
-               uvme_cv32e20_vp_rand_num_seq_c vp_seq;
-               if (!$cast(vp_seq, data_slv_seq.register_vp_vseq("vp_rand_num", cfg.vp_rand_num, uvme_cv32e20_vp_rand_num_seq_c::get_type()))) begin
-                  `uvm_fatal("CV32E20VPSEQ", $sformatf("Could not cast vp_rand_num correctly"));
-               end
-               vp_seq.cv32e20_cntxt = cntxt;
-            end
+            //begin
+            //   uvme_cv32e20_vp_rand_num_seq_c vp_seq;
+            //   if (!$cast(vp_seq, data_slv_seq.register_vp_vseq("vp_rand_num", cfg.vp_rand_num, uvme_cv32e20_vp_rand_num_seq_c::get_type()))) begin
+            //      `uvm_fatal("CV32E20VPSEQ", $sformatf("Could not cast vp_rand_num correctly"));
+            //   end
+            //   vp_seq.cv32e20_cntxt = cntxt;
+            //end
 
             begin
                uvme_cv32e20_vp_sig_writer_seq_c vp_seq;
@@ -395,6 +397,7 @@ function void uvme_cv32e20_env_c::assign_cfg();
 
    if (cfg.scoreboard_enabled) begin
       uvm_config_db#(uvma_core_cntrl_cfg_c)::set(this, "reference_model", "cfg", cfg);
+      uvm_config_db#(uvma_core_cntrl_cfg_c)::set(this, "*m_rvfi_scoreboard", "cfg", cfg);
    end
 
 endfunction: assign_cfg

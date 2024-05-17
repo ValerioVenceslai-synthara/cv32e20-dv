@@ -7,18 +7,18 @@ ENTRY(_start)
 /* CORE-V */
 MEMORY
 {
-    /* Our testbench is a bit weird in that we initialize the RAM (thus
-       allowing initialized sections to be placed there). Infact we dump all
-       sections to ram. */
-
-    ram (rwxai) : ORIGIN = 0x80000000, LENGTH = 0x400000
+    ram (rwxai) : ORIGIN = 0x80000000, LENGTH = 0x400000 /* 4 MB RAM */
 }
 
 ENTRY(_start)
 
+/* Configurable sizes for the heap, stack, and debugger stack */
+_heap_size = DEFINED(_heap_size) ? _heap_size : 0x100000; /* Default heap size 1MB */
+_stack_size = DEFINED(_stack_size) ? _stack_size : 0x40000; /* Default stack size 256KB */
+_debugger_stack_size = DEFINED(_debugger_stack_size) ? _debugger_stack_size : 0x10000; /* Default debugger stack size 64KB */
+
 SECTIONS
 {
-
   /* text: test code section */
   . = 0x80000000;
   .text.start : { *(.text.start) }
@@ -53,7 +53,6 @@ SECTIONS
   }
   .bss : { *(.bss) }
 
-  /* thread-local data segment */
   .tdata :
   {
     _tdata_begin = .;
@@ -66,24 +65,28 @@ SECTIONS
     _tbss_end = .;
   }
 
-  /* Heap grows upward towards end of ram */
-  .heap                    : ALIGN(16)
+  .heap : ALIGN(16)
   {
-   PROVIDE(__heap_start = .);
-   /* If end of ram is not 16-byte aligned, align to previous 16-byte
-      boundary */
-   PROVIDE(__heap_end = ALIGN(ORIGIN(ram) + LENGTH(ram) - __heap_start - 15, 16));
-   . = __heap_end;
+   PROVIDE(__heap_start = ORIGIN(ram) + LENGTH(ram) - _stack_size - _debugger_stack_size - _heap_size);
+   . += _heap_size;
+   PROVIDE(__heap_end = .);
   }
 
-  /* Stack grows downward from end of ram */
-  .stack (__heap_start)    : ALIGN(16) /* this is a requirement of the ABI(?) */
+  .stack (__debugger_stack_start) : ALIGN(16)
   {
-   PROVIDE(__stack_start = __heap_start);
-   . = __heap_end;
+   PROVIDE(__debugger_stack_start = ORIGIN(ram) + LENGTH(ram) - _stack_size - _debugger_stack_size);
+   . += _debugger_stack_size;
+   PROVIDE(__debugger_stack_end = .);
+  }
+
+  .stack (__stack_start) : ALIGN(16)
+  {
+   PROVIDE(__stack_start = ORIGIN(ram) + LENGTH(ram) - _stack_size);
+   . += _stack_size;
    PROVIDE(__stack_end = .);
   }
 
-  /* End of uninitalized data segement */
+  /* End of uninitialized data segment */
   _end = .;
 }
+

@@ -22,8 +22,8 @@
 #define ERR_CODE_TEST_6      6
 #define ERR_CODE_TEST_7      7
 
-#define TIMER_REG_ADDR         ((volatile uint32_t *) 0x15000000)  
-#define TIMER_VAL_ADDR         ((volatile uint32_t *) 0x15000004) 
+#define TIMER_REG_ADDR         ((volatile uint32_t *) 0x15000000)
+#define TIMER_VAL_ADDR         ((volatile uint32_t *) 0x15000004)
 
 #define MSTATUS_MIE_BIT 3
 
@@ -61,8 +61,6 @@ void mie_disable_all();
 void mie_enable(uint32_t irq);
 void mie_disable(uint32_t irq);
 void mm_ram_assert_irq(uint32_t mask, uint32_t cycle_delay);
-uint32_t random_num(uint32_t upper_bound, uint32_t lower_bound);
-uint32_t random_num32();
 extern void __no_irq_handler();
 void nested_irq_handler(uint32_t id);
 void generic_irq_handler(uint32_t id);
