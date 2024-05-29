@@ -80,42 +80,10 @@ module uvmt_cv32e20_tb;
    uvmt_cv32e20_step_compare_if step_compare_if();
    uvmt_cv32e20_isa_covg_if     isa_covg_if();
 
-  bind uvmt_cv32e20_dut_wrap
+  bind cve2_core
     uvma_rvfi_instr_if rvfi_instr_if(
                                 .clk            ( clknrst_if.clk),
-                                .reset_n        ( clknrst_if.reset_n),
-                                .rvfi_valid     ( cv32e20_top_i.rvfi_valid),
-                                .rvfi_order     ( cv32e20_top_i.rvfi_order),
-                                .rvfi_insn      ( cv32e20_top_i.rvfi_insn),
-                                .rvfi_trap      ( cv32e20_top_i.rvfi_trap),
-                                .rvfi_halt      ( cv32e20_top_i.rvfi_halt),
-                                .rvfi_intr      ( cv32e20_top_i.rvfi_intr),
-                                //.rvfi_dbg       ( cv32e20_top_i.rvfi_dbg),
-                                //.rvfi_dbg_mode  ( cv32e20_top_i.rvfi_dbg_mode),
-                                //.rvfi_nmip      ( cv32e20_top_i.rvfi_nmip),
-                                .rvfi_mode      ( cv32e20_top_i.rvfi_mode),
-                                .rvfi_ixl       ( cv32e20_top_i.rvfi_ixl),
-                                .rvfi_pc_rdata  ( cv32e20_top_i.rvfi_pc_rdata),
-                                .rvfi_pc_wdata  ( cv32e20_top_i.rvfi_pc_wdata),
-                                .rvfi_rs1_addr  ( cv32e20_top_i.rvfi_rs1_addr),
-                                .rvfi_rs1_rdata ( cv32e20_top_i.rvfi_rs1_rdata),
-                                .rvfi_rs2_addr  ( cv32e20_top_i.rvfi_rs2_addr),
-                                .rvfi_rs2_rdata ( cv32e20_top_i.rvfi_rs2_rdata),
-                                .rvfi_rs3_addr  (),
-                                .rvfi_rs3_rdata (),
-                                .rvfi_rd1_addr  ( cv32e20_top_i.rvfi_rd_addr),
-                                .rvfi_rd1_wdata ( cv32e20_top_i.rvfi_rd_wdata),
-                                .rvfi_rd2_addr  (),
-                                .rvfi_rd2_wdata (),
-                                //.rvfi_gpr_rdata ( rvfi_gpr_rdata),
-                                //.rvfi_gpr_rmask ( rvfi_gpr_rmask),
-                                //.rvfi_gpr_wdata ( rvfi_gpr_wdata),
-                                //.rvfi_gpr_wmask ( rvfi_gpr_wmask),
-                                .rvfi_mem_addr  ( cv32e20_top_i.rvfi_mem_addr),
-                                .rvfi_mem_rdata ( cv32e20_top_i.rvfi_mem_rdata),
-                                .rvfi_mem_rmask ( cv32e20_top_i.rvfi_mem_rmask),
-                                .rvfi_mem_wdata ( cv32e20_top_i.rvfi_mem_wdata),
-                                .rvfi_mem_wmask ( cv32e20_top_i.rvfi_mem_wmask)
+                                .reset_n        ( clknrst_if.reset_n)
                                 );
         bind cve2_cs_registers
         uvma_rvfi_unified_csr_if#(4096,32) rvfi_csr_if(
@@ -340,7 +308,7 @@ module uvmt_cv32e20_tb;
      uvm_config_db#(virtual uvmt_cv32e20_isa_covg_if        )::set(.cntxt(null), .inst_name("*.env"),                        .field_name("isa_covg_vif"),      .value(isa_covg_if)                                );
      uvm_config_db#(virtual uvma_interrupt_if                )::set(.cntxt(null), .inst_name("*.env"),                        .field_name("intr_vif"),         .value(interrupt_if)                               );
      uvm_config_db#(virtual uvma_debug_if                    )::set(.cntxt(null), .inst_name("*.env"),                        .field_name("debug_vif"),        .value(debug_if)                                   );
-     uvm_config_db#(virtual uvma_rvfi_instr_if               )::set(.cntxt(null), .inst_name("*.env.rvfi_agent"),             .field_name("instr_vif0"),       .value(dut_wrap.rvfi_instr_if)                     );
+     uvm_config_db#(virtual uvma_rvfi_instr_if               )::set(.cntxt(null), .inst_name("*.env.rvfi_agent"),             .field_name("instr_vif0"),       .value(dut_wrap.cv32e20_top_i.u_cve2_top.u_cve2_core.rvfi_instr_if));
      uvm_config_db#(virtual uvma_rvfi_unified_csr_if#(4096,32))::set(.cntxt(null), .inst_name("*.env.rvfi_agent"),             .field_name("csr_vif0"),        .value(dut_wrap.cv32e20_top_i.u_cve2_top.u_cve2_core.cs_registers_i.rvfi_csr_if));
      // TODO: fix this
      //uvm_config_db#(virtual RVVI_memory                      )::set(.cntxt(null), .inst_name("*.env"),                        .field_name("rvvi_memory_vif"),  .value(iss_wrap.ram.memory)                        );

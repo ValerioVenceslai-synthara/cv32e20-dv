@@ -116,14 +116,14 @@ constraint cve2_riscv_cons {
       ext_zbt_supported      == 0;
       ext_zifencei_supported == 1;
       ext_zicsr_supported    == 1;
-      ext_zcb_supported      == 1;
+      ext_zcb_supported      == 0;
 
       ext_cv32a60x_supported == 0;
       mode_s_supported       == 0;
       mode_u_supported       == 1;
 
       pmp_supported          == 0;
-      debug_supported        == 0;
+      debug_supported        == 1;
 
       unaligned_access_supported     == 0;
       unaligned_access_amo_supported == 0;
