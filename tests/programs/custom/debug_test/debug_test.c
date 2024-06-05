@@ -539,7 +539,7 @@ int main(int argc, char *argv[])
     check_debug_status(121, glb_hart_status);
 
     printf("\n\nTEST DELIBERATELY ENDED PREMATURELY (several tests still outstanding...)\n\n");
-    TEST_PASSED;
+    _exit(0);
 
     printf("------------------------\n");
     printf("Test 18: Single stepping\n");

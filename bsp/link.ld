@@ -8,6 +8,7 @@ ENTRY(_start)
 MEMORY
 {
     ram (rwxai) : ORIGIN = 0x80000000, LENGTH = 0x400000 /* 4 MB RAM */
+    dbg (rwxai) : ORIGIN = 0x1A110800, LENGTH = 0x50000
 }
 
 ENTRY(_start)
@@ -19,6 +20,25 @@ _debugger_stack_size = DEFINED(_debugger_stack_size) ? _debugger_stack_size : 0x
 
 SECTIONS
 {
+/* CORE-V Debugger Code: This section address must be the same as the
+     DM_HaltAddress parameter in the RTL */
+  .debugger (ORIGIN(dbg)):
+  {
+    KEEP(*(.debugger));
+  } >dbg
+  .debugger_exception (0x1A140000):
+  {
+    KEEP(*(.debugger_exception));
+  } >dbg
+  /* Debugger Stack*/
+  .debugger_stack ORIGIN(dbg) + LENGTH(dbg) - _debugger_stack_size : ALIGN(16)
+  {
+   PROVIDE(__debugger_stack_start = .);
+   . += _debugger_stack_size;
+   PROVIDE(__debugger_stack_end = .);
+  } >dbg
+
+
   /* text: test code section */
   . = 0x80000000;
   .text.start : { *(.text.start) }
@@ -70,13 +90,6 @@ SECTIONS
    PROVIDE(__heap_start = ORIGIN(ram) + LENGTH(ram) - _stack_size - _debugger_stack_size - _heap_size);
    . += _heap_size;
    PROVIDE(__heap_end = .);
-  }
-
-  .stack (__debugger_stack_start) : ALIGN(16)
-  {
-   PROVIDE(__debugger_stack_start = ORIGIN(ram) + LENGTH(ram) - _stack_size - _debugger_stack_size);
-   . += _debugger_stack_size;
-   PROVIDE(__debugger_stack_end = .);
   }
 
   .stack (__stack_start) : ALIGN(16)
