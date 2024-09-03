@@ -116,6 +116,59 @@ module uvmt_cv32e20_dut_wrap #(
 
     assign irq = irq_uvma | irq_vp;
 
+//---------------------------------------------------------------------------------
+// CV-X-IF issue interface signals.
+logic        xif_issue_valid;
+logic        xif_issue_ready;
+logic [31:0] xif_issue_req_instr;
+logic        xif_issue_resp_accept;
+logic        xif_issue_resp_writeback;
+logic [2:0]  xif_issue_resp_register_read;
+
+// CV-X-IF register interface signals.
+logic        xif_register_ready;
+logic [31:0] xif_register_rs1;
+logic [31:0] xif_register_rs2;
+logic [31:0] xif_register_rs3;
+logic [2:0]  xif_register_rs_valid;
+
+// CV-X-IF commit interface signals.
+logic        xif_commit_valid;
+logic        xif_commit_kill;
+
+// CV-X-IF result interface signals.
+logic        xif_result_ready;
+logic        xif_result_valid;
+logic        xif_result_we;
+logic [31:0] xif_result_data;
+
+// Flatten signals for the co-processor wrapper.
+logic[$bits(x_issue_req_t_dtype)-1:0]  xif_issue_req_flatten;
+logic[$bits(x_issue_resp_t_dtype)-1:0] xif_issue_resp_flatten;
+
+logic[$bits(x_register_t_dtype)-1:0]   xif_register_flatten;
+
+logic[$bits(x_commit_t_dtype)-1:0]     xif_commit_flatten;
+
+logic[$bits(x_result_t_dtype)-1:0]     xif_result_flatten;
+// Unused signals, just to simplify unpacking.
+hartid_t_dtype                         xif_result_hartid;
+id_t_dtype                             xif_result_id;
+
+logic[$bits(data_csr_dtype)-1:0]       csr_vec_mode_flatten;
+
+assign xif_issue_req_flatten = {xif_issue_req_instr, {$bits(hartid_t_dtype){1'b0}}, {$bits(id_t_dtype){1'b0}}}; // TODO add ID management
+always_comb begin
+       {xif_issue_resp_accept, xif_issue_resp_writeback, xif_issue_resp_register_read} = xif_issue_resp_flatten;
+end
+assign xif_register_flatten = {{$bits(hartid_t_dtype){1'b0}}, {$bits(id_t_dtype){1'b0}}, {xif_register_rs3, xif_register_rs2, xif_register_rs1}, xif_register_rs_valid};
+assign xif_commit_flatten =  {{$bits(hartid_t_dtype){1'b0}}, {$bits(id_t_dtype){1'b0}}, xif_commit_kill};
+always_comb begin
+       {xif_result_hartid, xif_result_id, xif_result_data, xif_result_we, xif_result_data} = xif_result_flatten;
+end
+assign csr_vec_mode_flatten = 32'd3; // Fixed word width vec mode
+//---------------------------------------------------------------------------------
+
     // ------------------------------------------------------------------------
     // Instantiate the core
 //    cve2_top #(
@@ -157,6 +210,30 @@ module uvmt_cv32e20_dut_wrap #(
          .data_rdata_i           ( obi_memory_data_if.rdata       ),
          .data_err_i             ( '0                             ),
 
+//---------------------------------------------------------------------------------
+  // CV-X-IF
+  // Issue interface
+         .xif_issue_valid_o(xif_issue_valid),
+         .xif_issue_req_instr_o(xif_issue_req_instr),
+         .xif_issue_ready_i(xif_issue_ready),
+         .xif_issue_resp_accept_i(xif_issue_resp_accept),
+         .xif_issue_resp_writeback_i(xif_issue_resp_writeback),
+         .xif_issue_resp_register_read_i(xif_issue_resp_register_read),
+  // Register interface
+         .xif_register_rs1_o(xif_register_rs1),
+         .xif_register_rs2_o(xif_register_rs2),
+         .xif_register_rs3_o(xif_register_rs3),
+         .xif_register_rs_valid_o(xif_register_rs_valid),
+  // Commit interface
+         .xif_commit_valid_o(xif_commit_valid),
+         .xif_commit_kill_o(xif_commit_kill),
+  // Result interface
+         .xif_result_ready_o(xif_result_ready),
+         .xif_result_valid_i(xif_result_valid),
+         .xif_result_we_i(xif_result_we),
+         .xif_result_data_i(xif_result_data),
+//---------------------------------------------------------------------------------
+
   // Interrupt inputs
          .irq_software_i         ( irq_uvma[3]),
          .irq_timer_i            ( irq_uvma[7]),
@@ -175,6 +252,38 @@ module uvmt_cv32e20_dut_wrap #(
          .fetch_enable_i          (core_cntrl_if.fetch_en), // fetch_enable_t
          .core_sleep_o            ()
         );
+
+//---------------------------------------------------------------------------------
+// Instantiate the co-processor
+      rvv_xcs_wrp i_rvv_xcs_wrp(
+       //std if signals.
+       .clk(clknrst_if.clk),
+       .resetn(clknrst_if.reset_n),
+
+       //cv-x-if Issue interface signals.
+       .issue_valid(xif_issue_valid),
+       .issue_ready(xif_issue_ready),
+       .issue_req_flatten(xif_issue_req_flatten),
+       .issue_resp_flatten(xif_issue_resp_flatten),
+
+       //cv-x-if Register interface signals.
+       .register_valid(xif_issue_valid),
+       .register_ready(xif_register_ready),
+       .register_flatten(xif_register_flatten),
+
+       //cv-x-if Commit interface signals.
+       .commit_valid(xif_commit_valid),
+       .commit_flatten(xif_commit_flatten),
+
+       //cv-x-if Result interface signals.
+       .result_ready(xif_result_ready),
+       .result_valid(xif_result_valid),
+       .result_flatten(xif_result_flatten),
+
+       //CSR vec mode.
+       .csr_vec_mode_flatten(csr_vec_mode_flatten)
+      );
+//---------------------------------------------------------------------------------
 
 
 
