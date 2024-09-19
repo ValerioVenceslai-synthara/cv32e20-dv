@@ -5,7 +5,7 @@
 // #define MAX_SIZE 4
 
 // Function to perform max pooling on a matrix
-void max_pool(int matrix[MAX_SIZE][MAX_SIZE], int size, int pool_size, int output[MAX_SIZE / 2][MAX_SIZE / 2]) {
+void max_pool(int matrix[MAX_SIZE][MAX_SIZE], int size, int pool_size, int output[MAX_SIZE / poolSize][MAX_SIZE / poolSize]) {
     int output_size = size / pool_size;
     for (int i = 0; i < output_size; i++) {
         for (int j = 0; j < output_size; j++) {
@@ -34,7 +34,7 @@ int main() {
 
     // int poolSize = 2;
     int outputSize = size / poolSize;
-    // int output[MAX_SIZE / 2][MAX_SIZE / 2];
+    int output[MAX_SIZE / poolSize][MAX_SIZE / poolSize];
 
     // Perform max pooling
     max_pool(input, size, poolSize, output);
