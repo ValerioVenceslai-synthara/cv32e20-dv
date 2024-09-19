@@ -106,7 +106,7 @@ constraint cve2_riscv_cons {
       ext_d_supported        == 0;
 
       ext_zba_supported      == 0;
-      ext_zbb_supported      == 0;
+      ext_zbb_supported      == 1;
       ext_zbc_supported      == 0;
 
       ext_zbe_supported      == 0;
