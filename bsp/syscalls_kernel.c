@@ -67,7 +67,7 @@ int _close(int file) { return -1; }
 int _execve(const char *name, char *const argv[], char *const env[]) {
   if (name == "return_to_machine") {
     {
-      printf("Returning to Machine");
+      //printf("Returning to Machine");
       csr_set_mask(mstatus, CSR_MSTATUS_MPP, PRIV_M);
     }
   }
@@ -290,9 +290,9 @@ void handle_syscall(long a0, long a1, long a2, long a3,
   case SYS_times:
     _times((struct tms *)a0);
     break;
-  case SYS_execve:
+  /*case SYS_execve:
     _execve((const char *)a0, (char *const)a1, (char *const)a2);
-    break;
+    break;*/
   default:
     unimplemented_syscall();
     break;
