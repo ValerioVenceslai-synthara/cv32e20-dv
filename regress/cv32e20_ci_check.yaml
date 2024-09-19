@@ -75,3 +75,8 @@ tests:
     cmd: make gen_corev-dv test COREV=YES TEST=corev_rand_jump_stress_test
 #    num: 2
 
+  maxpool:
+    build: uvmt_cv32e20
+    description: maxpool test basic
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=maxpool
