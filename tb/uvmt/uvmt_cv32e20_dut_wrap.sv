@@ -167,7 +167,6 @@ assign xif_commit_flatten =  {{$bits(hartid_t_dtype){1'b0}}, {$bits(id_t_dtype){
 always_comb begin
        {xif_result_hartid, xif_result_id, xif_result_data, xif_result_rd, xif_result_we} = xif_result_flatten;
 end
-assign csr_vec_mode_flatten = 32'd3; // Fixed word width vec mode
 //---------------------------------------------------------------------------------
 
     // ------------------------------------------------------------------------
@@ -233,6 +232,8 @@ assign csr_vec_mode_flatten = 32'd3; // Fixed word width vec mode
          .xif_result_valid_i(xif_result_valid),
          .xif_result_we_i(xif_result_we),
          .xif_result_data_i(xif_result_data),
+
+         .csr_vec_mode_o(csr_vec_mode_flatten),
 //---------------------------------------------------------------------------------
 
   // Interrupt inputs
