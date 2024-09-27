@@ -86,3 +86,11 @@ tests:
     description: maxpool test with custom assembly code
     dir: cv32e20/sim/uvmt
     cmd: make test COREV=YES TEST=maxpoolXCS
+
+  hwlp_test:
+    build: uvmt_cv32e20
+    description: hwlp test
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=hwlp_test
+
+ 
