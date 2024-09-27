@@ -1,0 +1,136 @@
+Magic 271485
+Revision Verdi_V-2023.12-SP1
+
+; Window Layout <x> <y> <width> <height> <signalwidth> <valuewidth>
+viewPort -10 -8 3440 1314 361 65
+
+; File list:
+; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
+openDirFile -d / -i 0 "" "/home/fdm/verif/core-v-verif/cv32e20/sim/uvmt/vcs_results/default/riscv_arithmetic_basic_test_0/0/inter.fsdb"
+
+; file time scale:
+; fileTimeScale ### s|ms|us|ns|ps
+
+; signal spacing:
+signalSpacing 5
+
+; windowTimeUnit is used for zoom, cursor & marker
+; waveform viewport range
+zoom 833569.765730 1184769.210174
+cursor 1251800.000000
+marker 0.000000
+
+; visible top row signal index
+top 0
+; marker line index
+markerPos 80
+
+; event list
+; addEvent event_name event_expression
+; curEvent event_name
+
+
+
+COMPLEX_EVENT_BEGIN
+
+
+COMPLEX_EVENT_END
+
+
+
+; toolbar current search type
+; curSTATUS search_type
+curSTATUS ByChange
+
+
+addGroup "if_stage"
+activeDirFile "" "/home/fdm/verif/core-v-verif/cv32e20/sim/uvmt/vcs_results/default/riscv_arithmetic_basic_test_0/0/inter.fsdb"
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/clk_i
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/rst_ni
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/pc_set_i
+addSignal -h 15 -UNSIGNED /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/pc_mux_i[2:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/hwlp0_start_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/hwlp1_start_i[31:0]
+addGroup "id_stage"
+addSignal -h 15 -UNSIGNED /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/decoder_i/opcode[6:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/instr_rdata_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/pc_id_i[31:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/instr_is_compressed_i
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/xif_issue_valid_o
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/pc_set_o
+addSignal -h 15 -UNSIGNED /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/pc_mux_o[2:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/hwlp0_start_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/hwlp1_start_o[31:0]
+addGroup "hwlopp_regs"
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_start_data_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_end_data_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_cnt_data_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_we_i[2:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_regid_i[0:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/valid_i
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_dec_cnt_i[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_start_addr_o[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_end_addr_o[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_counter_o[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_start_q[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_end_q[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/cve2_hwloop_regs_i/hwlp_counter_q[1:0]
+addGroup "decoder"
+addSignal -expanded -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/decoder_i/hwlp_start_mux_sel_o[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/decoder_i/hwlp_start_mux_sel_o[1]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/decoder_i/hwlp_start_mux_sel_o[0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/decoder_i/hwlp_end_mux_sel_o[1:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/decoder_i/hwlp_cnt_mux_sel_o
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/decoder_i/hwlp_we_o[2:0]
+addGroup "controller"
+addSignal -h 15 -2COMP -UDEC /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp0_cnt[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp0_end[31:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/branch_i
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg[31:0]
+addSignal -expanded -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[31:1]
+addSignal -h 15 -UNSIGNED -UDEC /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[7][31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[6][31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[5][31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[4][31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[3][31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[2][31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[1][31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp1_cnt[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp1_end[31:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp0_end_eq_pc
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp1_end_eq_pc
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp0_cnt_ge_zero
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp1_cnt_ge_zero
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp0_jump
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/controller_i/hwlp1_jump
+addGroup "prefetch_buffer+fifo" -e FALSE
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/clk_i
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/rst_ni
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/pc_set_i
+addSignal -h 15 -UNSIGNED /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/pc_mux_i[2:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/fetch_addr_n[31:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/branch_i
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/stored_addr_d[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/stored_addr_q[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/fetch_addr_d[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/fetch_addr_q[31:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/fetch_addr_en
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/instr_addr[31:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/instr_rvalid_i
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/fifo_i/out_rdata_o[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/instr_rdata_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/compressed_decoder_i/instr_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/fifo_i/valid_d[2:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/fifo_i/valid_q[2:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/prefetch_buffer_i/fifo_i/clear_i
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/instr_valid_id_o
+addGroup "compressed_decoder" -e FALSE
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/compressed_decoder_i/instr_i[31:0]
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/compressed_decoder_i/instr_o[31:0]
+addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/compressed_decoder_i/is_compressed_o
+addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/compressed_decoder_i/instr_o[31:0]
+addGroup "G8"
+
+; getSignalForm Scope Hierarchy Status
+; active file of getSignalForm
+
