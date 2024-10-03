@@ -127,6 +127,16 @@ task uvmt_cv32e20_firmware_test_c::run_phase(uvm_phase phase);
    `uvm_info("TEST", $sformatf("Finished RUN: exit status is %0h", vp_status_vif.exit_value), UVM_NONE)
    phase.drop_objection(this);
 
+   begin
+      int objections_active;
+
+      // Get the number of active objections in this phase
+      objections_active = phase.get_objection().get_objection_total(phase);
+
+      // Print the total number of objections active in this phase
+      $display("Active objections in %s: %0d", phase.get_name(), objections_active);
+   end
+
 endtask : run_phase
 
 task uvmt_cv32e20_firmware_test_c::reset_debug();

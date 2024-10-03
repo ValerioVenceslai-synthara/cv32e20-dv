@@ -7,10 +7,15 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
+.equ MATRIX_ELEMENT, 255 # (N-1)  Const values so that when trying different matrix/vector dimensions they are
+.equ VECTOR_ELEMENT, 15 # (M-1)  the only number to be modified   
+
+.equ MATRIX_ROW, 16     # Equal to the number of columns. This test has been designed for squared matrix so far.
+
 .section .data
-matrix:     .word 1, 2, 3, 4, 5, 6, 7, 8, 9    # 3x3 matrix
-vector:     .word 1, 2, 3                      # 3x1 vector
-result:     .space 12                          # Space for 3 integers (3x1 result vector)
+matrix:     .space 1024   # 3x3 matrix, space for 9 integers
+vector:     .space 64   # 3x1 vector, space for 3 integers
+result:     .space 64  # 3x1 result vector, space for 3 integers
 
 
 .section .text.start
@@ -80,12 +85,44 @@ init:
                   li x30, 0x80000000
                   li x31, 0xf4b85b42
                   la x12, user_stack_end
+
 main:         
+                  la        t0, matrix                # Load the base address of the matrix into t0 
+                  la        t1, vector                # Load the base address of the vector into t1
+
+                  li        t4, MATRIX_ELEMENT        # Load const values for matrix and vector iterations 
+                  li        t5, VECTOR_ELEMENT 
+                  li        t6, MATRIX_ROW
+
+                  ### Set hwlp regs to initilize the matrix ###  
+                  cv.starti 1, fill_matrix 
+                  cv.endi   1, hwlp_setup_fill_vector
+                  cv.count  1, t4                   
+
+                  li        t3, 0x1           # matrix[0][0] = 1
+
+fill_matrix: 
+                  cv.sw     t3, (t0), 0x4     # Store matrix element
+                  addi      t3, t3, 0x1       # Next value to store ( 1  , 2  , 3, ..., i)
+                                              #                     ( i+1, i+2, ....)
+hwlp_setup_fill_vector:
+
+                  cv.starti 1, fill_vector 
+                  cv.endi   1, mul_init
+                  cv.count  1, t5  
+
+                  li        t3, 0x1           # vector[0] = 1
+
+fill_vector:
+                  cv.sw     t3, (t1), 0x4     # Store vector element
+                  addi      t3, t3, 0x1       # Next value to be stored (1, 2, 3, ... i)
+
+mul_init:         
                   la   t0, matrix             # Load the base address of the matrix into t0 
                   la   t1, vector             # Load the base address of the vector into t1
                   la   t2, result             # Load the base address of the result into t2
 
-                  li   t3, 0x3                # a3 = number of rows/columns (squared matrix)
+                  li   t3, MATRIX_ROW         # t3 = number of rows/columns (squared matrix)
                   li   t4, 0x0                # i = 0 (row index)
 
 row_loop:

@@ -212,7 +212,7 @@ function void uvmt_cv32e20_base_test_c::build_phase(uvm_phase phase);
 
    super.build_phase(phase);
 
-   rs.set_max_quit_count(.count(5), .overridable(1));
+   rs.set_max_quit_count(.count(1000000), .overridable(1));
 
    retrieve_vifs    ();
    create_cfg       ();

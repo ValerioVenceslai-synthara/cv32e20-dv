@@ -8,15 +8,15 @@
 .include "user_define.h"
 
 
-.equ MATRIX_ELEMENT, 255 # (N-1)  Const values so that when trying different matrix/vector dimensions they are
-.equ VECTOR_ELEMENT, 15  # (M-1)  the only number to be modified   
+.equ MATRIX_ELEMENT, 255 # (N-1)  
+.equ VECTOR_ELEMENT, 15  #   
 
-.equ MATRIX_ROW, 15      # Equal to the number of columns. This test has been designed for squared matrix so far.
+.equ MATRIX_ROW, 3       
 
 .section .data
-matrix:     .space 1024  # 3x3 matrix, space for 9 integers
-vector:     .space 64    # 3x1 vector, space for 3 integers
-result:     .space 64    # 3x1 result vector, space for 3 integers
+matrix:     .space 256  
+vector:     .space 8    
+result:     .space 8    
 
 
 .section .text.start
@@ -102,7 +102,7 @@ main:
                   li        t3, 0x1           # matrix[0][0] = 1
 
 fill_matrix: 
-                  cv.sw     t3, (t0), 0x4     # Store matrix element
+                  cv.sb     t3, (t0), 0x1     # Store matrix element
                   addi      t3, t3, 0x1       # Next value to store ( 1  , 2  , 3, ..., i)
                                               #                     ( i+1, i+2, ....)
 hwlp_setup_fill_vector:
@@ -114,44 +114,44 @@ hwlp_setup_fill_vector:
                   li        t3, 0x1           # vector[0] = 1
 
 fill_vector:
-                  cv.sw     t3, (t1), 0x4     # Store vector element
+                  cv.sb     t3, (t1), 0x1     # Store vector element
                   addi      t3, t3, 0x1       # Next value to be stored (1, 2, 3, ... i)
 
 mul_init:
 
-                  la t0, matrix               # Load the base address of the matrix into t0 
-                  la t1, vector               # Load the base address of the vector into t1
-                  la t2, result               # Load the base address of the result into t2
+                  la          t0, matrix        # Load the base address of the matrix into t0 
+                  la          t1, vector        # Load the base address of the vector into t1
+                  la          t2, result        # Load the base address of the result into t2
 
-                  cv.starti 1, row_loop       # Set the start address for the row loop (outer loop)
-                  cv.endi   1, done           # Set the end address for the row loop
-                  cv.count  1, t6             # Set the number of iterations of the row loop (#rows - 1)
+                  cv.starti   1, row_loop       # Set the start address for the row loop (outer loop)
+                  cv.endi     1, done           # Set the end address for the row loop
+                  cv.count    1, t6             # Set the number of iterations of the row loop (#rows - 1)
 
-                  cv.starti 0, col_loop       # Set the start address for the column loop (inner loop)
-                  cv.endi   0, store_result   # Set the end address for the column loop  
-                  cv.count  0, t6             # Set the number of interations for the column loop (#columns - 1) (needed for the first iteration)
+                  cv.starti   0, col_loop       # Set the start address for the column loop (inner loop)
+                  cv.endi     0, store_result   # Set the end address for the column loop  
+                  cv.count    0, t6             # Set the number of interations for the column loop (#columns - 1) (needed for the first iteration)
 
 row_loop:
-                  li        t3, 0x0           # sum = 0, clear the sum for this row
-                  la        t1, vector        # Reset pointer to vector for each row
+                  li          t3, 0x0           # sum = 0, clear the sum for this row
+                  la          t1, vector        # Reset pointer to vector for each row
                   
 col_loop:
-                  cv.lw     t4, (t0), 0x4     # Load matrix[i][j] into t10 (increment t9 by 4)
+                  cv.lw       t4, (t0), 0x4     # Load matrix[i][j] into t10 (increment t9 by 4)
                   
-                  cv.lw     t5, (t1), 0x4     # Load vector[j] into t11
+                  cv.lw       t5, (t1), 0x4     # Load vector[j] into t11
 
-                  cv.mac    t3, t4, t5        # sum += matrix[i][j] * vector[j]
+                  cv.sdotup.b t3, t4, t5        # sum += matrix[i][j] * vector[j]
 
 store_result:
-                  cv.count 0, t6              # Set the number of interations for the column loop (#columns - 1)
-                                              # This instruction could be placed only in the row loop, appearing only once in the code.
-                                              # However, it is placed also in the init section because of the following hwlp contraint:
-                                              # "When both loops are nested, at least 1 instruction should be present between last 
-                                              # innermost HWLoop (must be #0) instruction and last outermost HWLoop (must be #1) instruction. 
-                                              # In other words the End address of the outermost HWLoop must be at least 8 bytes further than
-                                              # the End address of the innermost HWLoop (HWLoop[1].endaddress >= HWLoop[0].endaddress + 8)" 
+                  cv.count 0, t6                # Set the number of interations for the column loop (#columns - 1)
+                                                # This instruction could be placed only in the row loop, appearing only once in the code.
+                                                # However, it is placed also in the init section because of the following hwlp contraint:
+                                                # "When both loops are nested, at least 1 instruction should be present between last 
+                                                # innermost HWLoop (must be #0) instruction and last outermost HWLoop (must be #1) instruction. 
+                                                # In other words the End address of the outermost HWLoop must be at least 8 bytes further than
+                                                # the End address of the innermost HWLoop (HWLoop[1].endaddress >= HWLoop[0].endaddress + 8)" 
 
-                  cv.sw     t3, (t2), 0x4     # Store the sum in result[i]
+                  cv.sw     t3, (t2), 0x4       # Store the sum in result[i]
 
 done:
                   ### Just for debugging ###
