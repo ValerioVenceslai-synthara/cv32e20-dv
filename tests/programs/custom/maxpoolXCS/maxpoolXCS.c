@@ -46,13 +46,14 @@ int main() {
     max_pool(input, size, poolSize, output);
 
     // Print the output matrix
-    printf("the result of the maxpool is: \n");
-    for (int i = 0; i < outputSize; i++) {
-        for (int j = 0; j < outputSize; j++) {
-            printf("%d ", output[i][j]);
-        }
-        printf("\n");
-    }
+    // printf("the result of the maxpool is: \n");
+    // for (int i = 0; i < outputSize; i++) {
+    //     for (int j = 0; j < outputSize; j++) {
+    //         printf("%d ", output[i][j]);
+    //     }
+    //     printf("\n");
+    // }
 
+    // printf("Done");
     return 0;
 }
