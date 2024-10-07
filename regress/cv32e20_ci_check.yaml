@@ -105,12 +105,59 @@ tests:
     dir: cv32e20/sim/uvmt
     cmd: make test COREV=YES TEST=matrix_vector_mul_test
 
-   matrix_vector_mul_XCS_byte:
+  matrix_vector_mul_XCS_byte:
     build: uvmt_cv32e20
     description: matrix vector multiplication test with ISA extension byte
     dir: cv32e20/sim/uvmt
     cmd: make test COREV=YES TEST=matrix_vector_mul_XCS_byte
+
+
+
+  max_pooling:
+    build: uvmt_cv32e20
+    description: max pooling assembly code test without extensions
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=max_pooling
+
+  max_pooling_XCS:
+    build: uvmt_cv32e20
+    description: max pooling assembly code test with extensions
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=max_pooling_XCS
+
+  max_pooling16_XCS:
+    build: uvmt_cv32e20
+    description: max pooling assembly code test with extensions 16-bit values
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=max_pooling16_XCS
+
+  max_pooling8_XCS:
+    build: uvmt_cv32e20
+    description: max pooling assembly code test with extensions 8-bit values
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=max_pooling8_XCS
  
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   maxpoolXCS_simd:
     build: uvmt_cv32e20

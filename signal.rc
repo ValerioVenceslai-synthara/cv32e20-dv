@@ -6,7 +6,7 @@ viewPort -10 -8 3440 1314 244 65
 
 ; File list:
 ; openDirFile [-d delimiter] [-s time_offset] [-rf auto_bus_rule_file] path_name file_name
-openDirFile -d / -i 0 "" "/home/fdm/verif/core-v-verif/cv32e20/sim/uvmt/vcs_results/default/matrix_vector_mul_XCS_byte/0/inter.fsdb"
+openDirFile -d / -i 0 "" "/home/fdm/verif/core-v-verif/cv32e20/sim/uvmt/vcs_results/default/max_pooling_XCS/0/inter.fsdb"
 
 ; file time scale:
 ; fileTimeScale ### s|ms|us|ns|ps
@@ -16,8 +16,8 @@ signalSpacing 5
 
 ; windowTimeUnit is used for zoom, cursor & marker
 ; waveform viewport range
-zoom 0.000000 370187.750771
-cursor 3104961800.000000
+zoom 190072327.900000 197861245.900000
+cursor 197471800.000000
 marker 0.000000
 
 ; visible top row signal index
@@ -44,7 +44,7 @@ curSTATUS ByChange
 
 
 addGroup "G1"
-activeDirFile "" "/home/fdm/verif/core-v-verif/cv32e20/sim/uvmt/vcs_results/default/matrix_vector_mul_XCS_byte/0/inter.fsdb"
+activeDirFile "" "/home/fdm/verif/core-v-verif/cv32e20/sim/uvmt/vcs_results/default/max_pooling_XCS/0/inter.fsdb"
 addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/clk_i
 addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/rst_ni
 addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/instr_valid_i
@@ -89,11 +89,11 @@ addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_to
 addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[2][31:0]
 addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/register_file_i/rf_reg_q[1][31:0]
 addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/xif_result_valid_i
-addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/xif_result_data_i[31:0]
+addSignal -h 15 -UNSIGNED -UDEC /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/id_stage_i/xif_result_data_i[31:0]
 addGroup "Load&Store Unit"
 addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/load_store_unit_i/data_addr_o[31:0]
 addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/load_store_unit_i/data_wdata_o[31:0]
-addSignal -h 15 -UNSIGNED -HEX /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/load_store_unit_i/data_rdata_i[31:0]
+addSignal -h 15 -UNSIGNED -UDEC /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/load_store_unit_i/data_rdata_i[31:0]
 addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/load_store_unit_i/lsu_resp_valid_o
 addGroup "Fetch"
 addSignal -h 15 /uvmt_cv32e20_tb/dut_wrap/cv32e20_top_i/u_cve2_top/u_cve2_core/if_stage_i/instr_req_o
