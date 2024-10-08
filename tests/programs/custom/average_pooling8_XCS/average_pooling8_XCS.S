@@ -7,32 +7,32 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ RESULT_LENGTH, 7 #(M-1) (8x8 matrix)   
+.equ RESULT_LENGTH, 15 #(M-1) (8x8 matrix)   
 
 .section .data
 matrix:
-    .word 0x04030201  # 4, 3, 2, 1
-    .word 0x0C0B0A09  # 12, 11, 10, 9
-    .word 0x08070605  # 8, 7, 6, 5
-    .word 0x100F0E0D  # 16, 15, 14, 13
+    .word 0x0102090A  # 1, 2, 9, 10
+    .word 0x03040B0C  # 3, 4, 11, 12
+    .word 0x05060D0E  # 5, 6, 13, 14
+    .word 0x07080F10  # 7, 8, 15, 16
 
-    .word 0x14131211  # 20, 19, 18, 17
-    .word 0x1C1B1A19  # 28, 27, 26, 25
-    .word 0x18171615  # 24, 23, 22, 21
-    .word 0x201F1E1D  # 32, 31, 30, 29
+    .word 0x1112191A  # 17, 18, 25, 26
+    .word 0x13141B1C  # 19, 20, 27, 28
+    .word 0x15161D1E  # 21, 22, 29, 30
+    .word 0x17181F20  # 23, 24, 31, 32
 
-    .word 0x24232221  # 36, 35, 34, 33
-    .word 0x2C2B2A29  # 44, 43, 42, 41
-    .word 0x28272625  # 40, 39, 38, 37
-    .word 0x302F2E2D  # 48, 47, 46, 45
+    .word 0x2122392A  # 33, 34, 41, 42
+    .word 0x23243B3C  # 35, 36, 43, 44
+    .word 0x25263D3E  # 37, 38, 45, 46
+    .word 0x27283F40  # 39, 40, 47, 48
 
-    .word 0x34333231  # 52, 51, 50, 49
-    .word 0x3C3B3A39  # 60, 59, 58, 57
-    .word 0x38373635  # 56, 55, 54, 53
-    .word 0x403F3E3D  # 64, 63, 62, 61
+    .word 0x3132513A  # 49, 50, 57, 58
+    .word 0x3334533C  # 51, 52, 59, 60
+    .word 0x3536553E  # 53, 54, 61, 62
+    .word 0x37385760  # 55, 56, 63, 64
 
 result: 
-    .space 16    
+    .space 16        
 
 .section .text.start
 .globl _start
@@ -103,32 +103,29 @@ init:
 
 main:         
 
-                  la        t0, matrix
-                  la        t1, result 
-                  li        t2, RESULT_LENGTH       
+                  la          t0, matrix
+                  la          t1, result 
+                  li          t2, RESULT_LENGTH   
 
-                  csrwi     0xa0, 1
+                  csrwi       0xa0, 1
 
-                  cv.starti 1, matrix_element_loop       
-                  cv.endi   1, done           
-                  cv.count  1, t2                   
+                  cv.starti   1, matrix_element_loop       
+                  cv.endi     1, done           
+                  cv.count    1, t2     
 
+                  li          t3, 0x01010101        
+                    
 matrix_element_loop:
 
-                  cv.lw     t3, (t0), 4 
-                  cv.lw     t4, (t0), 4    
-                  cv.max.b  t5, t3, t4
-                  srli      t4, t5, 8 
-                  cv.max.b  t5, t5, t4
-                  srli      t6, t5, 16 
+                  cv.lw       t4, (t0), 4
+                  cv.dotup.b  t5, t4, t3 
+                  srli        t5, t5, 2
 
 store_result:
-
-                  cv.sb     t5, (t1), 1 
-                  cv.sb     t6, (t1), 1    
+              
+                  cv.sb       t5, (t1), 1       
 
 done:
-
                   ### Just for debugging ###
                   la   t1, result
                   lb   t4, 0(t1)  
@@ -140,6 +137,7 @@ done:
 
                   j fast_exit              # Exit the program
                   
+
 #Start: Extracted from riscv_compliance_tests/riscv_test.h
 fast_exit:
                   /* print "\nDONE\n\n" */

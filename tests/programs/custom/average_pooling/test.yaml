@@ -1,0 +1,4 @@
+name: average_pooling
+uvm_test: uvmt_$(CV_CORE_LC)_firmware_test_c
+description: >
+    average pooling assembly code test without ISA extensions

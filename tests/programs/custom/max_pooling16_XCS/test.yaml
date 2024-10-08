@@ -1,4 +1,4 @@
 name: max_pooling16_XCS
 uvm_test: uvmt_$(CV_CORE_LC)_firmware_test_c
 description: >
-    max pooling assembly code test with extensions 16-bit values
+    max pooling assembly code test with extensions 16-bit data

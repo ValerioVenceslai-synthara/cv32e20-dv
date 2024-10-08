@@ -1,0 +1,4 @@
+name: 1D_conv_XCS
+uvm_test: uvmt_$(CV_CORE_LC)_firmware_test_c
+description: >
+    1D conv with ISA extensions

@@ -87,31 +87,25 @@ tests:
     dir: cv32e20/sim/uvmt
     cmd: make test COREV=YES TEST=maxpoolXCS
 
-  hwlp_test:
-    build: uvmt_cv32e20
-    description: hwlp test
-    dir: cv32e20/sim/uvmt
-    cmd: make test COREV=YES TEST=hwlp_test
 
-  matrix_vector_mul_XCS_test:
-    build: uvmt_cv32e20
-    description: matrix vector multiplication test with ISA extension
-    dir: cv32e20/sim/uvmt
-    cmd: make test COREV=YES TEST=matrix_vector_mul_XCS_test
- 
-  matrix_vector_mul_test:
+
+  matrix_vector_mul:
     build: uvmt_cv32e20
     description: matrix vector multiplication test without ISA extension
     dir: cv32e20/sim/uvmt
-    cmd: make test COREV=YES TEST=matrix_vector_mul_test
+    cmd: make test COREV=YES TEST=  matrix_vector_mul:
 
-  matrix_vector_mul_XCS_byte:
+  matrix_vector_mul_XCS:
+    build: uvmt_cv32e20
+    description: matrix vector multiplication test with ISA extension
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=matrix_vector_mul_XCS
+
+  matrix_vector_mul8_XCS:
     build: uvmt_cv32e20
     description: matrix vector multiplication test with ISA extension byte
     dir: cv32e20/sim/uvmt
-    cmd: make test COREV=YES TEST=matrix_vector_mul_XCS_byte
-
-
+    cmd: make test COREV=YES TEST=matrix_vector_mul8_XCS
 
   max_pooling:
     build: uvmt_cv32e20
@@ -125,18 +119,61 @@ tests:
     dir: cv32e20/sim/uvmt
     cmd: make test COREV=YES TEST=max_pooling_XCS
 
-  max_pooling16_XCS:
-    build: uvmt_cv32e20
-    description: max pooling assembly code test with extensions 16-bit values
-    dir: cv32e20/sim/uvmt
-    cmd: make test COREV=YES TEST=max_pooling16_XCS
-
   max_pooling8_XCS:
     build: uvmt_cv32e20
-    description: max pooling assembly code test with extensions 8-bit values
+    description: max pooling assembly code test with extensions 8-bit data
     dir: cv32e20/sim/uvmt
     cmd: make test COREV=YES TEST=max_pooling8_XCS
  
+  max_pooling16_XCS:
+    build: uvmt_cv32e20
+    description: max pooling assembly code test with extensions 16-bit data
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=max_pooling16_XCS
+
+
+  average_pooling:
+    build: uvmt_cv32e20
+    description: average pooling assembly code test without extensions
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=average_pooling
+
+  average_pooling_XCS:
+    build: uvmt_cv32e20
+    description: average pooling assembly code test with extensions
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=average_pooling_XCS
+
+  average_pooling8_XCS:
+    build: uvmt_cv32e20
+    description: average pooling assembly code test with extensions 8-bit data
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=average_pooling8_XCS
+ 
+  average_pooling16_XCS:
+    build: uvmt_cv32e20
+    description: average pooling assembly code test with extensions 16-bit data
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=average_pooling16_XCS
+
+  1D_conv:
+    build: uvmt_cv32e20
+    description: 1D conv without ISA extensions
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=1D_conv
+
+  1D_conv_XCS:
+    build: uvmt_cv32e20
+    description: 1D conv with ISA extensions
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=1D_conv_XCS
+
+  1D_conv16_XCS:
+    build: uvmt_cv32e20
+    description: 1D conv with ISA extensions 16-bit data
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=1D_conv16_XCS
+
  
  
 

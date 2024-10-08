@@ -104,7 +104,7 @@ main:
                   la        t1, result 
                   li        t2, RESULT_LENGTH   
 
-                  csrwi     0xa0, 0x3
+                  csrwi     0xa0, 3
 
                   cv.starti 1, matrix_element_loop       
                   cv.endi   1, done           
@@ -112,25 +112,25 @@ main:
                     
 matrix_element_loop:
 
-                  cv.lw       t3, (t0), 0x4 
-                  cv.lw       t4, (t0), 0x4 
-                  cv.lw       t5, (t0), 0x4 
-                  cv.lw       t6, (t0), 0x4    
+                  cv.lw       t3, (t0), 4 
+                  cv.lw       t4, (t0), 4 
+                  cv.lw       t5, (t0), 4 
+                  cv.lw       t6, (t0), 4    
                   cv.max      t3, t3, t4
                   cv.max      t4, t5, t6
                   cv.max      t5, t3, t4
 
 store_result:
               
-                  cv.sw       t5, (t1), 0x4       
+                  cv.sw       t5, (t1), 4       
 
 done:
                   ### Just for debugging ###
                   la   t1, result
                   lw   t4, 0(t1)  
-                  addi t1, t1, 0x4
+                  addi t1, t1, 4
                   lw   t5, 0(t1)  
-                  addi t1, t1, 0x4
+                  addi t1, t1, 4
                   lw   t6, 0(t1)  
                   ##########################
 

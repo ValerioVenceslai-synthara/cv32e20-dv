@@ -115,24 +115,24 @@ main:
 
 matrix_element_loop:
 
-                  cv.lw     t3, (t0), 0x4 
-                  cv.lw     t4, (t0), 0x4    
+                  cv.lw     t3, (t0), 4 
+                  cv.lw     t4, (t0), 4    
                   cv.max.h  t5, t3, t4
-                  srli      t4, t5, 0x10 
+                  srli      t4, t5, 16 
                   cv.max.h  t5, t5, t4
 
 store_result:
 
-                  cv.sh      t5, (t1), 0x2     
+                  cv.sh      t5, (t1), 2     
 
 done:
 
                   ### Just for debugging ###
                   la   t1, result
                   lh   t4, 0(t1)  
-                  addi t1, t1, 0x2
+                  addi t1, t1, 2
                   lh   t5, 0(t1)  
-                  addi t1, t1, 0x2
+                  addi t1, t1, 2
                   lh   t6, 0(t1)  
                   ##########################
 

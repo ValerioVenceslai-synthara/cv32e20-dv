@@ -7,32 +7,20 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ RESULT_LENGTH, 7 #(M-1) (8x8 matrix)   
+.equ RESULT_LENGTH, 16 # M (8x8 matrix)   
 
 .section .data
-matrix:
-    .word 0x04030201  # 4, 3, 2, 1
-    .word 0x0C0B0A09  # 12, 11, 10, 9
-    .word 0x08070605  # 8, 7, 6, 5
-    .word 0x100F0E0D  # 16, 15, 14, 13
+signal:     .word 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x00030001
+            .word 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x001E001D, 0x0020001F
+            .word 0x00220021, 0x00240023, 0x00260025, 0x00280027, 0x002A0029, 0x002C002B
+            .word 0x002E002D, 0x0030002F, 0x00320031, 0x00340033, 0x00360035, 0x00380037
 
-    .word 0x14131211  # 20, 19, 18, 17
-    .word 0x1C1B1A19  # 28, 27, 26, 25
-    .word 0x18171615  # 24, 23, 22, 21
-    .word 0x201F1E1D  # 32, 31, 30, 29
+kernel:     .word 0x0001FFFF 
 
-    .word 0x24232221  # 36, 35, 34, 33
-    .word 0x2C2B2A29  # 44, 43, 42, 41
-    .word 0x28272625  # 40, 39, 38, 37
-    .word 0x302F2E2D  # 48, 47, 46, 45
-
-    .word 0x34333231  # 52, 51, 50, 49
-    .word 0x3C3B3A39  # 60, 59, 58, 57
-    .word 0x38373635  # 56, 55, 54, 53
-    .word 0x403F3E3D  # 64, 63, 62, 61
+signal_len: .word 24
 
 result: 
-    .space 16    
+    .space 196    
 
 .section .text.start
 .globl _start
@@ -103,43 +91,54 @@ init:
 
 main:         
 
-                  la        t0, matrix
-                  la        t1, result 
-                  li        t2, RESULT_LENGTH       
+                  csrwi 0xa0, 2
 
-                  csrwi     0xa0, 1
+                  la   t0, signal
+                  la   t1, kernel 
+                  la   t2, result
 
-                  cv.starti 1, matrix_element_loop       
-                  cv.endi   1, done           
-                  cv.count  1, t2                   
+                  lw   t3, signal_len
 
-matrix_element_loop:
+                  cv.starti 1, signal_element_loop
+                  cv.endi   1, done
+                  cv.count  1, t3
 
-                  cv.lw     t3, (t0), 4 
-                  cv.lw     t4, (t0), 4    
-                  cv.max.b  t5, t3, t4
-                  srli      t4, t5, 8 
-                  cv.max.b  t5, t5, t4
-                  srli      t6, t5, 16 
+                  li        a0, 0
+                  lw        t5, kernel
+
+signal_element_loop:
+
+                  la   t1, kernel     # kernel base address
+                  li   t3, 0          # accumulator
+
+                  lw   t4, 0(t0)
+
+                  cv.sdotsp.h  t3, t4, t5
 
 store_result:
+                  cv.sh   t3, (t2), 2
 
-                  cv.sb     t5, (t1), 1 
-                  cv.sb     t6, (t1), 1    
+                  la   t0, signal
 
+                  addi a0, a0, 1
+
+                  slli a1, a0, 1
+
+                  add  t0, t0, a1
+                  
 done:
-
                   ### Just for debugging ###
-                  la   t1, result
-                  lb   t4, 0(t1)  
-                  addi t1, t1, 1
-                  lb   t5, 0(t1)  
-                  addi t1, t1, 1
-                  lb   t6, 0(t1)  
+                  la   t2, result
+                  lh   t4, 0(t2)  
+                  addi t2, t2, 2
+                  lh   t5, 0(t2)  
+                  addi t2, t2, 2
+                  lh   t6, 0(t2)  
                   ##########################
 
                   j fast_exit              # Exit the program
                   
+
 #Start: Extracted from riscv_compliance_tests/riscv_test.h
 fast_exit:
                   /* print "\nDONE\n\n" */
@@ -1156,4 +1155,3 @@ kernel_stack_start:
 .endr
 kernel_stack_end:
 .4byte 0x0
-
