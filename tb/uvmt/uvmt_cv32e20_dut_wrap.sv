@@ -116,62 +116,25 @@ module uvmt_cv32e20_dut_wrap #(
 
     assign irq = irq_uvma | irq_vp;
 
+
+
 //---------------------------------------------------------------------------------
-// CV-X-IF issue interface signals.
-logic                 xif_issue_valid;
-logic                 xif_issue_ready;
-instr_dtype           xif_issue_req_instr;
-logic                 xif_issue_resp_accept;
-writeregflags_t_dtype xif_issue_resp_writeback;
-readregflags_t_dtype  xif_issue_resp_register_read;
+    rvv_cv_x_if cv_x_if_issue();
+    rvv_cv_x_if cv_x_if_register();
+    rvv_cv_x_if cv_x_if_commit();
+    rvv_cv_x_if cv_x_if_result();
+    status_if#(.DTYPE(data_csr_dtype)) csr_vec_mode();
 
-// CV-X-IF register interface signals.
-logic                 xif_register_ready;
-logic [31:0]          xif_register_rs1;
-logic [31:0]          xif_register_rs2;
-logic [31:0]          xif_register_rs3;
-readregflags_t_dtype  xif_register_rs_valid;
-
-// CV-X-IF commit interface signals.
-logic                 xif_commit_valid;
-logic                 xif_commit_kill;
-
-// CV-X-IF result interface signals.
-logic                 xif_result_ready;
-logic                 xif_result_valid;
-writeregflags_t_dtype xif_result_we;
-cv_x_result_dtype     xif_result_data;
-
-// Flatten signals for the co-processor wrapper.
-logic[$bits(x_issue_req_t_dtype)-1:0]  xif_issue_req_flatten;
-logic[$bits(x_issue_resp_t_dtype)-1:0] xif_issue_resp_flatten;
-
-logic[$bits(x_register_t_dtype)-1:0]   xif_register_flatten;
-
-logic[$bits(x_commit_t_dtype)-1:0]     xif_commit_flatten;
-
-logic[$bits(x_result_t_dtype)-1:0]     xif_result_flatten;
-// Unused signals, just to simplify unpacking.
-hartid_t_dtype                         xif_result_hartid;
-id_t_dtype                             xif_result_id;
-reg_file_addr_dtype                    xif_result_rd;
-
-logic[$bits(data_csr_dtype)-1:0]       csr_vec_mode_flatten;
-
-assign xif_issue_req_flatten = {xif_issue_req_instr, {$bits(hartid_t_dtype){1'b0}}, {$bits(id_t_dtype){1'b0}}}; // TODO add ID management
-always_comb begin
-       {xif_issue_resp_accept, xif_issue_resp_writeback, xif_issue_resp_register_read} = xif_issue_resp_flatten;
-end
-assign xif_register_flatten = {{$bits(hartid_t_dtype){1'b0}}, {$bits(id_t_dtype){1'b0}}, {xif_register_rs3, xif_register_rs2, xif_register_rs1}, xif_register_rs_valid};
-assign xif_commit_flatten =  {{$bits(hartid_t_dtype){1'b0}}, {$bits(id_t_dtype){1'b0}}, xif_commit_kill};
-always_comb begin
-       {xif_result_hartid, xif_result_id, xif_result_data, xif_result_rd, xif_result_we} = xif_result_flatten;
-end
+    snt_std_if xcs_std();
+    always_comb xcs_std.clk = clknrst_if.clk;
+    always_comb xcs_std.resetn = clknrst_if.reset_n;
 //---------------------------------------------------------------------------------
 
-    // ------------------------------------------------------------------------
+
+
+// --------------------------------------------------------------------------------
     // Instantiate the core
-//    cve2_top #(
+    //cve2_top #(
     cve2_top_tracing #(
                .MHPMCounterNum   (MHPMCounterNum),
                .MHPMCounterWidth (MHPMCounterWidth),
@@ -191,7 +154,7 @@ end
          .hart_id_i              ( 32'h0000_0000                  ),
          .boot_addr_i            ( core_cntrl_if.boot_addr       ), //<---MJS changing to 0
 
-  // Instruction memory interface
+         // Instruction memory interface
          .instr_req_o            ( obi_memory_instr_if.req        ), // core to agent
          .instr_gnt_i            ( obi_memory_instr_if.gnt        ), // agent to core
          .instr_rvalid_i         ( obi_memory_instr_if.rvalid     ),
@@ -199,7 +162,7 @@ end
          .instr_rdata_i          ( obi_memory_instr_if.rdata      ),
          .instr_err_i            ( '0                             ),
 
-  // Data memory interface
+         // Data memory interface
          .data_req_o             ( obi_memory_data_if.req         ),
          .data_gnt_i             ( obi_memory_data_if.gnt         ),
          .data_rvalid_i          ( obi_memory_data_if.rvalid      ),
@@ -211,80 +174,53 @@ end
          .data_err_i             ( '0                             ),
 
 //---------------------------------------------------------------------------------
-  // CV-X-IF
-  // Issue interface
-         .xif_issue_valid_o(xif_issue_valid),
-         .xif_issue_req_instr_o(xif_issue_req_instr),
-         .xif_issue_ready_i(xif_issue_ready),
-         .xif_issue_resp_accept_i(xif_issue_resp_accept),
-         .xif_issue_resp_writeback_i(xif_issue_resp_writeback),
-         .xif_issue_resp_register_read_i(xif_issue_resp_register_read),
-  // Register interface
-         .xif_register_rs1_o(xif_register_rs1),
-         .xif_register_rs2_o(xif_register_rs2),
-         .xif_register_rs3_o(xif_register_rs3),
-         .xif_register_rs_valid_o(xif_register_rs_valid),
-  // Commit interface
-         .xif_commit_valid_o(xif_commit_valid),
-         .xif_commit_kill_o(xif_commit_kill),
-  // Result interface
-         .xif_result_ready_o(xif_result_ready),
-         .xif_result_valid_i(xif_result_valid),
-         .xif_result_we_i(xif_result_we),
-         .xif_result_data_i(xif_result_data),
-
-         .csr_vec_mode_o(csr_vec_mode_flatten),
+         // CV-X-IF.
+         // Issue interface.
+         .xcs_cv_x_if_issue(cv_x_if_issue),
+         // Register interface.
+         .xcs_cv_x_if_register(cv_x_if_register),
+         // Commit interface.
+         .xcs_cv_x_if_commit(cv_x_if_commit),
+         // Result interface.  
+         .xcs_cv_x_if_result(cv_x_if_result),
+         // CSR vec mode.
+         .csr_vec_mode(csr_vec_mode),
 //---------------------------------------------------------------------------------
 
-  // Interrupt inputs
+         // Interrupt inputs
          .irq_software_i         ( irq_uvma[3]),
          .irq_timer_i            ( irq_uvma[7]),
          .irq_external_i         ( irq_uvma[11]),
          .irq_fast_i             ( irq_uvma[31:16]),
          .irq_nm_i               ( irq_uvma[0]),       // non-maskeable interrupt
 
-  // Debug Interface
+         // Debug Interface
          .debug_req_i             (debug_req_uvma),
          .crash_dump_o            (),
 
-  // RISC-V Formal Interface
-  // Does not comply with the coding standards of _i/_o suffixes, but follows
-  // the convention of RISC-V Formal Interface Specification.
-  // CPU Control Signals
+         // RISC-V Formal Interface
+         // Does not comply with the coding standards of _i/_o suffixes, but follows
+         // the convention of RISC-V Formal Interface Specification.
+         // CPU Control Signals
+
          .fetch_enable_i          (core_cntrl_if.fetch_en), // fetch_enable_t
          .core_sleep_o            ()
         );
 
+
+
+
 //---------------------------------------------------------------------------------
-// Instantiate the co-processor
-      rvv_xcs_wrp i_rvv_xcs_wrp(
-       //std if signals.
-       .clk(clknrst_if.clk),
-       .resetn(clknrst_if.reset_n),
-
-       //cv-x-if Issue interface signals.
-       .issue_valid(xif_issue_valid),
-       .issue_ready(xif_issue_ready),
-       .issue_req_flatten(xif_issue_req_flatten),
-       .issue_resp_flatten(xif_issue_resp_flatten),
-
-       //cv-x-if Register interface signals.
-       .register_valid(xif_issue_valid),
-       .register_ready(xif_register_ready),
-       .register_flatten(xif_register_flatten),
-
-       //cv-x-if Commit interface signals.
-       .commit_valid(xif_commit_valid),
-       .commit_flatten(xif_commit_flatten),
-
-       //cv-x-if Result interface signals.
-       .result_ready(xif_result_ready),
-       .result_valid(xif_result_valid),
-       .result_flatten(xif_result_flatten),
-
-       //CSR vec mode.
-       .csr_vec_mode_flatten(csr_vec_mode_flatten)
-      );
+      // Instantiate the co-processor
+       rvv_xcs i_rvv_xcs
+       (
+         .xcs_std(xcs_std),
+         .xcs_cv_x_if_issue(cv_x_if_issue),
+         .xcs_cv_x_if_register(cv_x_if_register),
+         .xcs_cv_x_if_commit(cv_x_if_commit),
+         .xcs_cv_x_if_result(cv_x_if_result),
+         .csr_vec_mode(csr_vec_mode)
+       );
 //---------------------------------------------------------------------------------
 
 
