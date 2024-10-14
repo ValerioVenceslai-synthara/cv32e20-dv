@@ -103,9 +103,15 @@ tests:
 
   matrix_vector_mul8_XCS:
     build: uvmt_cv32e20
-    description: matrix vector multiplication test with ISA extension byte
+    description: matrix vector multiplication test with ISA extension 8-bit data
     dir: cv32e20/sim/uvmt
     cmd: make test COREV=YES TEST=matrix_vector_mul8_XCS
+
+  matrix_vector_mul16_XCS:
+    build: uvmt_cv32e20
+    description: matrix vector multiplication test with ISA extension 16-bit data
+    dir: cv32e20/sim/uvmt
+    cmd: make test COREV=YES TEST=matrix_vector_mul16_XCS
 
   max_pooling:
     build: uvmt_cv32e20

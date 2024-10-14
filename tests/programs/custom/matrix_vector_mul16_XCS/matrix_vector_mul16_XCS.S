@@ -11,11 +11,11 @@
 .equ MATRIX_ELEMENT, 255 # (N-1)  
 .equ VECTOR_ELEMENT, 15  #   
 
-.equ MATRIX_ROW, 3       
+.equ MATRIX_ROW, 7       
 
 .section .data
-matrix:     .space 256  
-vector:     .space 16    
+matrix:     .space 512  
+vector:     .space 32    
 result:     .space 64   
 
 
@@ -88,7 +88,7 @@ init:
                   la x12, user_stack_end
 main:         
 
-                  csrwi     0xa0, 1
+                  csrwi     0xa0, 2
 
                   la        t0, matrix                # Load the base address of the matrix into t0 
                   la        t1, vector                # Load the base address of the vector into t1
@@ -105,7 +105,7 @@ main:
                   li        t3, 1           # matrix[0][0] = 1
 
 fill_matrix: 
-                  cv.sb     t3, (t0), 1     # Store matrix element
+                  cv.sh     t3, (t0), 2     # Store matrix element
                   addi      t3, t3, 1       # Next value to store ( 1  , 2  , 3, ..., i)
                                               #                     ( i+1, i+2, ....)
 hwlp_setup_fill_vector:
@@ -117,7 +117,7 @@ hwlp_setup_fill_vector:
                   li        t3, 1           # vector[0] = 1
 
 fill_vector:
-                  cv.sb     t3, (t1), 1     # Store vector element
+                  cv.sh     t3, (t1), 2     # Store vector element
                   addi      t3, t3, 1       # Next value to be stored (1, 2, 3, ... i)
 
 mul_init:
@@ -143,7 +143,7 @@ col_loop:
                   
                   cv.lw       t5, (t1), 4     # Load vector[j] into t11
 
-                  cv.sdotup.b t3, t4, t5        # sum += matrix[i][j] * vector[j]
+                  cv.sdotup.h t3, t4, t5        # sum += matrix[i][j] * vector[j]
 
 store_result:
                   cv.count 0, t6                # Set the number of interations for the column loop (#columns - 1)

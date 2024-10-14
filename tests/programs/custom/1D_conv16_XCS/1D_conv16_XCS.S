@@ -6,9 +6,7 @@
 # END: riscv-dv
 # BEGIN: gtumbush
 .include "user_define.h"
-
-.equ RESULT_LENGTH, 16 # M (8x8 matrix)   
-
+ 
 .section .data
 signal:     .word 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x00030001
             .word 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x001E001D, 0x0020001F
@@ -17,7 +15,7 @@ signal:     .word 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x
 
 kernel:     .word 0x0001FFFF 
 
-signal_len: .word 24
+signal_len: .word 23
 
 result: 
     .space 196    
@@ -108,10 +106,9 @@ main:
 
 signal_element_loop:
 
-                  la   t1, kernel     # kernel base address
-                  li   t3, 0          # accumulator
-
-                  lw   t4, 0(t0)
+                  li   t3, 0         
+                  
+                  cv.lw   t4, (t0), 4
 
                   cv.sdotsp.h  t3, t4, t5
 
