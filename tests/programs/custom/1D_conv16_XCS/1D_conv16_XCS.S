@@ -6,19 +6,24 @@
 # END: riscv-dv
 # BEGIN: gtumbush
 .include "user_define.h"
- 
+
+.equ SIGNAL_LENGTH, 11
+.equ KERNEL_LENGHT, 4
+.equ KERNEL_ITERATIONS, 1 # (-1 because of hwlp)
+.equ MAX_VALUE, 256
+.equ SIGNAL_ITERATIONS, 3 # SIGNAL_LENGTH - KERNEL_LENGHT + 1 (-1 because of hwlp)
+.equ RESULT_LENGTH, 8 #  = SIGNAL_ITERATIONS + 1
+
 .section .data
-signal:     .word 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x00030001
-            .word 0x00030001, 0x00030001, 0x00030001, 0x00030001, 0x001E001D, 0x0020001F
-            .word 0x00220021, 0x00240023, 0x00260025, 0x00280027, 0x002A0029, 0x002C002B
-            .word 0x002E002D, 0x0030002F, 0x00320031, 0x00340033, 0x00360035, 0x00380037
+signal:
+    .space 22
 
-kernel:     .word 0x0001FFFF 
+kernel:
+    .space 8
 
-signal_len: .word 23
+result:
+    .space 16
 
-result: 
-    .space 196    
 
 .section .text.start
 .globl _start
@@ -88,52 +93,93 @@ init:
                   la x12, user_stack_end
 
 main:         
+                  la t0, signal
+                  la t6, kernel
+                  li t1, SIGNAL_LENGTH
+                  li t2, MAX_VALUE
+                  li t3, 0 # signal value to store
+                  li t5, 0 # kernel value to store
+                  li a0, 0 # signal element index
+                  li a1, 0 # kernel element index
+
+                  li t4, KERNEL_LENGHT
+
+signal_init:
+                  beq a0, t1, kernel_init
+                  sh t3, 0(t0)
+                  addi t0, t0, 2
+
+                  addi t3, t3, 1
+                  beq  t3, t2, reset_signal_value
+                  addi a0, a0, 1
+                  j signal_init
+
+reset_signal_value:
+                  li t3, 0
+                  addi a0, a0, 1
+                  j signal_init
+
+kernel_init:
+                  beq a1, t4, start_kernel
+                  sh t5, 0(t6)
+                  addi t6, t6, 2
+
+                  addi t5, t5, 1
+                  beq  t5, t2, reset_kernel_value
+                  addi a1, a1, 1
+                  j kernel_init
+
+reset_kernel_value:
+                  li t3, 0
+                  addi a1, a1, 1
+                  j kernel_init
+
+start_kernel:
+                  la t0, signal
+                  li t1, SIGNAL_ITERATIONS
+                  li t4, KERNEL_ITERATIONS
+                  la t5, kernel
+                  la a6, result
 
                   csrwi 0xa0, 2
 
-                  la   t0, signal
-                  la   t1, kernel 
-                  la   t2, result
+                  cv.starti 1, signal_loop       
+                  cv.endi   1, done           
+                  cv.count  1, t1   
 
-                  lw   t3, signal_len
+                  cv.starti 0, kernel_loop       
+                  cv.endi   0, store_result           
+                  cv.count  0, t4
 
-                  cv.starti 1, signal_element_loop
-                  cv.endi   1, done
-                  cv.count  1, t3
+signal_loop:
+                  li a5, 0
+                  mv a3, t0
 
-                  li        a0, 0
-                  lw        t5, kernel
-
-signal_element_loop:
-
-                  li   t3, 0         
+kernel_loop:
+                  cv.lw  a2, (a3), 4
+                  cv.lw  a4, (t5), 4
                   
-                  cv.lw   t4, (t0), 4
-
-                  cv.sdotsp.h  t3, t4, t5
+                  cv.sdotup.h a5, a2, a4
 
 store_result:
-                  cv.sh   t3, (t2), 2
+                  cv.sh a5, (a6), 2
 
-                  la   t0, signal
+                  addi t0, t0, 4
+                  la t5, kernel
+                  cv.count 0, t4
 
-                  addi a0, a0, 1
-
-                  slli a1, a0, 1
-
-                  add  t0, t0, a1
-                  
 done:
-                  ### Just for debugging ###
-                  la   t2, result
-                  lh   t4, 0(t2)  
-                  addi t2, t2, 2
-                  lh   t5, 0(t2)  
-                  addi t2, t2, 2
-                  lh   t6, 0(t2)  
-                  ##########################
+                  la t0, result 
+                  li t1, RESULT_LENGTH
+                  li t2, 0 
 
-                  j fast_exit              # Exit the program
+load_loop:
+                  bge t2, t1, fast_exit
+                  lhu t4, 0(t0)
+                  addi t0, t0, 2
+                  
+                  addi t2, t2, 1
+                  j load_loop
                   
 
 #Start: Extracted from riscv_compliance_tests/riscv_test.h

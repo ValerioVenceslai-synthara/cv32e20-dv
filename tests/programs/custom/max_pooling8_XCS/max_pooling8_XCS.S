@@ -7,32 +7,19 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ RESULT_LENGTH, 7 #(M-1) (8x8 matrix)   
+# 8x8 matrix, 4x4 window
+.equ MATRIX_ELEMENTS, 64
+.equ MAX_VALUE, 256
+.equ MATRIX_ITERATIONS, 3
+.equ WINDOW_ITERATIONS, 3
+.equ RESULT_LENGTH, 4
 
 .section .data
 matrix:
-    .word 0x04030201  # 4, 3, 2, 1
-    .word 0x0C0B0A09  # 12, 11, 10, 9
-    .word 0x08070605  # 8, 7, 6, 5
-    .word 0x100F0E0D  # 16, 15, 14, 13
+    .space 64
 
-    .word 0x14131211  # 20, 19, 18, 17
-    .word 0x1C1B1A19  # 28, 27, 26, 25
-    .word 0x18171615  # 24, 23, 22, 21
-    .word 0x201F1E1D  # 32, 31, 30, 29
-
-    .word 0x24232221  # 36, 35, 34, 33
-    .word 0x2C2B2A29  # 44, 43, 42, 41
-    .word 0x28272625  # 40, 39, 38, 37
-    .word 0x302F2E2D  # 48, 47, 46, 45
-
-    .word 0x34333231  # 52, 51, 50, 49
-    .word 0x3C3B3A39  # 60, 59, 58, 57
-    .word 0x38373635  # 56, 55, 54, 53
-    .word 0x403F3E3D  # 64, 63, 62, 61
-
-result: 
-    .space 16    
+result:
+    .space 4
 
 .section .text.start
 .globl _start
@@ -102,44 +89,76 @@ init:
                   la x12, user_stack_end
 
 main:         
+                  la t0, matrix
+                  li t1, MATRIX_ELEMENTS
+                  li t2, MAX_VALUE
+                  li t3, 0 
+                  li a0, 0
 
-                  la        t0, matrix
-                  la        t1, result 
-                  li        t2, RESULT_LENGTH       
+matrix_init:
+                  beq a0, t1, start_kernel
+                  sb t3, 0(t0)
+                  addi t0, t0, 1
 
-                  csrwi     0xa0, 1
+                  addi t3, t3, 1
+                  beq  t3, t2, reset
+                  addi a0, a0, 1
+                  j matrix_init
 
-                  cv.starti 1, matrix_element_loop       
+reset:
+                  li t3, 0
+                  addi a0, a0, 1
+                  j matrix_init
+
+start_kernel:         
+
+                  la t0, matrix     
+                  la t1, result    
+                  li t2, MATRIX_ITERATIONS     
+                  li t3, WINDOW_ITERATIONS    
+
+                  csrwi 0xa0, 1
+
+                  cv.starti 1, matrix_loop       
                   cv.endi   1, done           
-                  cv.count  1, t2                   
+                  cv.count  1, t2   
 
-matrix_element_loop:
+                  cv.starti 0, window_loop       
+                  cv.endi   0, store_result           
+                  cv.count  0, t3   
+matrix_loop:                       
 
-                  cv.lw     t3, (t0), 4 
-                  cv.lw     t4, (t0), 4    
-                  cv.max.b  t5, t3, t4
-                  srli      t4, t5, 8 
-                  cv.max.b  t5, t5, t4
-                  srli      t6, t5, 16 
+                  li t5, 0         
 
+window_loop:
+
+                  cv.lw      t4, (t0), 4   
+                  cv.maxu.b  t5, t4, t5
+                  
 store_result:
 
-                  cv.sb     t5, (t1), 1 
-                  cv.sb     t6, (t1), 1    
+                  srli       t4, t5, 16 
+                  cv.maxu.b  t5, t5, t4
+                  srli       t4, t5, 8 
+                  cv.maxu.b  t5, t5, t4
+                  cv.sb      t5, (t1), 1
+
+                  cv.count  0, t3          
 
 done:
 
-                  ### Just for debugging ###
-                  la   t1, result
-                  lb   t4, 0(t1)  
-                  addi t1, t1, 1
-                  lb   t5, 0(t1)  
-                  addi t1, t1, 1
-                  lb   t6, 0(t1)  
-                  ##########################
+                  la t0, result 
+                  li t1, RESULT_LENGTH
+                  li t2, 0 
 
-                  j fast_exit              # Exit the program
+load_loop:
+                  bge  t2, t1, fast_exit
+                  lbu  t4, 0(t0)
+                  addi t0, t0, 1
                   
+                  addi t2, t2, 1
+                  j load_loop
+ 
 #Start: Extracted from riscv_compliance_tests/riscv_test.h
 fast_exit:
                   /* print "\nDONE\n\n" */

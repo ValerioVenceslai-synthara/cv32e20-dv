@@ -7,28 +7,18 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ RESULT_LENGTH, 16 # M (8x8 matrix)   
+.equ MATRIX_ELEMENTS, 64
+.equ MAX_VALUE, 256
+.equ MATRIX_ITERATIONS, 1
+.equ WINDOW_ITERATIONS, 64
+.equ SHIFT_AMT, 6
+.equ RESULT_LENGTH, 1
 
 .section .data
 matrix:
-    .word 1, 2, 9, 10     
-    .word 3, 4, 11, 12    
-    .word 5, 6, 13, 14    
-    .word 7, 8, 15, 16
-    .word 17, 18, 25, 26  
-    .word 19, 20, 27, 28  
-    .word 21, 22, 29, 30  
-    .word 23, 24, 31, 32
-    .word 33, 34, 41, 42  
-    .word 35, 36, 43, 44  
-    .word 37, 38, 45, 46  
-    .word 39, 40, 47, 48
-    .word 49, 50, 57, 58  
-    .word 51, 52, 59, 60  
-    .word 53, 54, 61, 62  
-    .word 55, 56, 63, 64     
+    .space 1024
 
-result: 
+result:
     .space 64    
 
 .section .text.start
@@ -99,41 +89,70 @@ init:
                   la x12, user_stack_end
 
 main:         
+                  la t0, matrix
+                  li t1, MATRIX_ELEMENTS
+                  li t2, MAX_VALUE
+                  li t3, 0 # value to store
+                  li a0, 0 # matrix element index
 
-                  la  t0, matrix
-                  la  t1, result 
-                  li  t2, RESULT_LENGTH         
+matrix_init:
+                  beq a0, t1, start_kernel
+                  sw t3, 0(t0)
+                  addi t0, t0, 4
 
-matrix_element_loop:
+                  addi t3, t3, 1
+                  beq  t3, t2, reset
+                  addi a0, a0, 1
+                  j matrix_init
 
-                  lw   t3, 0(t0)        
-                  lw   t4, 4(t0)        
-                  lw   t5, 8(t0)           
-                  lw   t6, 12(t0)    
+reset:
+                  li t3, 0
+                  addi a0, a0, 1
+                  j matrix_init
 
-                  add  t3, t3, t4
-                  add  t4, t5, t6
-                  add  t5, t3, t4
-                  srli t5, t5, 2      
-                  
-                  sw   t5, 0(t1)
+start_kernel:
+                  la t0, matrix
+                  la t1, result 
+                  li t2, MATRIX_ITERATIONS
+                  li t3, WINDOW_ITERATIONS
+
+                  li a0, 0 # matrix loop index       
+
+matrix_loop:
+                  beq a0, t2, done
+                  li a1, 0 # window loop index 
+                  li t5, 0 # needed for the first iteration of the window
+
+window_loop:
+                  beq a1, t3, store_result
+                  lw t4, 0(t0)
+                  add t5, t5, t4
+
+                  addi t0, t0, 4
+                  addi a1, a1, 1
+                  j window_loop
+
+store_result: 
+                  srli t5, t5, SHIFT_AMT
+                  sw t5, 0(t1)
                   addi t1, t1, 4
 
-                  addi t0, t0, 16
-                  addi t2, t2, -1
-                  bnez t2, matrix_element_loop
+                  addi a0, a0, 1
+                  j matrix_loop
                   
 done:
-                  ### Just for debugging ###
-                  la   t1, result
-                  lw   t4, 0(t1)  
-                  addi t1, t1, 4
-                  lw   t5, 0(t1)  
-                  addi t1, t1, 4
-                  lw   t6, 0(t1)  
-                  ##########################
 
-                  j fast_exit              # Exit the program
+                  la t0, result 
+                  li t1, RESULT_LENGTH
+                  li t2, 0 
+
+load_loop:
+                  bge t2, t1, fast_exit
+                  lw t4, 0(t0)
+                  addi t0, t0, 4
+                  
+                  addi t2, t2, 1
+                  j load_loop
                   
 
 #Start: Extracted from riscv_compliance_tests/riscv_test.h

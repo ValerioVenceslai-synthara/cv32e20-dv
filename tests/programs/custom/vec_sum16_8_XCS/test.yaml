@@ -1,0 +1,4 @@
+name: vec_sum16_8_XCS
+uvm_test: uvmt_$(CV_CORE_LC)_firmware_test_c
+description: >
+    sum between two vectors with rounding and normalization (extensions enabled)

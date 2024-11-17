@@ -7,32 +7,19 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ RESULT_LENGTH, 15 #(M-1) (8x8 matrix)   
+# 8x8 matrix, 4x4 window
+.equ MATRIX_ELEMENTS, 64
+.equ MAX_VALUE, 256
+.equ MATRIX_ITERATIONS, 3
+.equ WINDOW_ITERATIONS, 7
+.equ RESULT_LENGTH, 4
 
 .section .data
 matrix:
-    .word 0x00010002, 0x0009000A  # 1, 2    | 9, 10
-    .word 0x00030004, 0x000B000C  # 3, 4    | 11, 12
-    .word 0x00050006, 0x000D000E  # 5, 6    | 13, 14
-    .word 0x00070008, 0x000F0010  # 7, 8    | 15, 16
+    .space 128
 
-    .word 0x00110012, 0x0019001A  # 17, 18  | 25, 26
-    .word 0x00130014, 0x001B001C  # 19, 20  | 27, 28
-    .word 0x00150016, 0x001D001E  # 21, 22  | 29, 30
-    .word 0x00170018, 0x001F0020  # 23, 24  | 31, 32
-
-    .word 0x00210022, 0x0029002A  # 33, 34  | 41, 42
-    .word 0x00230024, 0x002B002C  # 35, 36  | 43, 44
-    .word 0x00250026, 0x002D002E  # 37, 38  | 45, 46
-    .word 0x00270028, 0x002F0030  # 39, 40  | 47, 48
-
-    .word 0x00310032, 0x0039003A  # 49, 50  | 57, 58
-    .word 0x00330034, 0x003B003C  # 51, 52  | 59, 60
-    .word 0x00350036, 0x003D003E  # 53, 54  | 61, 62
-    .word 0x00370038, 0x003F0040  # 55, 56  | 63, 64
-    
-result: 
-    .space 32    
+result:
+    .space 8
 
 .section .text.start
 .globl _start
@@ -102,42 +89,74 @@ init:
                   la x12, user_stack_end
 
 main:         
+                  la t0, matrix
+                  li t1, MATRIX_ELEMENTS
+                  li t2, MAX_VALUE
+                  li t3, 0 
+                  li a0, 0
 
-                  la        t0, matrix
-                  la        t1, result 
-                  li        t2, RESULT_LENGTH    
+matrix_init:
+                  beq a0, t1, start_kernel
+                  sh t3, 0(t0)
+                  addi t0, t0, 2
 
-                  csrwi     0xa0, 0x2 
+                  addi t3, t3, 1
+                  beq  t3, t2, reset
+                  addi a0, a0, 1
+                  j matrix_init
 
-                  cv.starti 1, matrix_element_loop       
+reset:
+                  li t3, 0
+                  addi a0, a0, 1
+                  j matrix_init
+
+start_kernel:         
+
+                  la t0, matrix     
+                  la t1, result    
+                  li t2, MATRIX_ITERATIONS     
+                  li t3, WINDOW_ITERATIONS    
+
+                  csrwi 0xa0, 2
+
+                  cv.starti 1, matrix_loop       
                   cv.endi   1, done           
-                  cv.count  1, t2                    
+                  cv.count  1, t2   
 
-matrix_element_loop:
+                  cv.starti 0, window_loop       
+                  cv.endi   0, store_result           
+                  cv.count  0, t3   
+matrix_loop:                       
 
-                  cv.lw     t3, (t0), 4 
-                  cv.lw     t4, (t0), 4    
-                  cv.max.h  t5, t3, t4
-                  srli      t4, t5, 16 
-                  cv.max.h  t5, t5, t4
+                  li t5, 0         
 
+window_loop:
+
+                  cv.lw     t4, (t0), 4   
+                  cv.max.h  t5, t4, t5
+                  
 store_result:
 
-                  cv.sh      t5, (t1), 2     
+                  srli      t4, t5, 16 
+                  cv.max.h  t5, t5, t4
+                  cv.sh     t5, (t1), 2
+
+                  cv.count  0, t3      
 
 done:
 
-                  ### Just for debugging ###
-                  la   t1, result
-                  lh   t4, 0(t1)  
-                  addi t1, t1, 2
-                  lh   t5, 0(t1)  
-                  addi t1, t1, 2
-                  lh   t6, 0(t1)  
-                  ##########################
+                  la t0, result 
+                  li t1, RESULT_LENGTH
+                  li t2, 0 
 
-                  j fast_exit              # Exit the program
+load_loop:
+                  bge t2, t1, fast_exit
+                  lhu t4, 0(t0)
+                  addi t0, t0, 2
                   
+                  addi t2, t2, 1
+                  j load_loop
+ 
 #Start: Extracted from riscv_compliance_tests/riscv_test.h
 fast_exit:
                   /* print "\nDONE\n\n" */

@@ -8,14 +8,15 @@
 .include "user_define.h"
 
 
-.equ MATRIX_ELEMENT, 255 # (N-1)  
-.equ VECTOR_ELEMENT, 15  #   
+.equ MATRIX_ELEMENTS, 256   
+.equ VECTOR_ELEMENTS, 16     
 
-.equ MATRIX_ROW, 3       
+.equ MATRIX_ROWS, 15
+.equ MATRIX_COLS, 3       
 
 .section .data
-matrix:     .space 256  
-vector:     .space 16    
+matrix:     .space 512  
+vector:     .space 32    
 result:     .space 64   
 
 
@@ -87,86 +88,80 @@ init:
                   li x31, 0xf4b85b42
                   la x12, user_stack_end
 main:         
+                  la          t0, matrix         
+                  la          t1, vector         
 
-                  csrwi     0xa0, 1
+                  li          t4, MATRIX_ELEMENTS 
+                  li          t5, VECTOR_ELEMENTS 
 
-                  la        t0, matrix                # Load the base address of the matrix into t0 
-                  la        t1, vector                # Load the base address of the vector into t1
-
-                  li        t4, MATRIX_ELEMENT        # Load const values for matrix and vector iterations 
-                  li        t5, VECTOR_ELEMENT 
-                  li        t6, MATRIX_ROW
-
-                  ### Set hwlp regs to initilize the matrix ###  
-                  cv.starti 1, fill_matrix 
-                  cv.endi   1, hwlp_setup_fill_vector
-                  cv.count  1, t4                   
-
-                  li        t3, 1           # matrix[0][0] = 1
+                  li          a0, 0
+                  li          t3, 0x1           
 
 fill_matrix: 
-                  cv.sb     t3, (t0), 1     # Store matrix element
-                  addi      t3, t3, 1       # Next value to store ( 1  , 2  , 3, ..., i)
-                                              #                     ( i+1, i+2, ....)
-hwlp_setup_fill_vector:
+                  bge         a0, t4, init_fill_vector
+                  sb          t3, 0(t0)         
+                  addi        t0, t0, 1
+                  addi        t3, t3, 0x1       
+                                              
 
-                  cv.starti 1, fill_vector 
-                  cv.endi   1, mul_init
-                  cv.count  1, t5  
+                  addi        a0, a0, 1
+                  j           fill_matrix
 
-                  li        t3, 1           # vector[0] = 1
+init_fill_vector:
+          
+                  li          a0, 0
+                  li          t3, 1
 
 fill_vector:
-                  cv.sb     t3, (t1), 1     # Store vector element
-                  addi      t3, t3, 1       # Next value to be stored (1, 2, 3, ... i)
+                  bge         a0, t5, mul_init
+                  sb          t3, 0(t1)             
+                  addi        t1, t1, 1
+                  addi        t3, t3, 0x1           
+
+                  addi        a0, a0, 1
+                  j           fill_vector
 
 mul_init:
+                  la t0, matrix         
+                  la t1, vector        
+                  la t2, result        
 
-                  la          t0, matrix        # Load the base address of the matrix into t0 
-                  la          t1, vector        # Load the base address of the vector into t1
-                  la          t2, result        # Load the base address of the result into t2
+                  cv.starti 1, row_loop       
+                  cv.endi   1, done           
+                  cv.counti 1, MATRIX_ROWS            
 
-                  cv.starti   1, row_loop       # Set the start address for the row loop (outer loop)
-                  cv.endi     1, done           # Set the end address for the row loop
-                  cv.count    1, t6             # Set the number of iterations of the row loop (#rows - 1)
+                  cv.starti 0, col_loop       
+                  cv.endi   0, store_result     
+                  cv.counti 0, MATRIX_COLS   
 
-                  cv.starti   0, col_loop       # Set the start address for the column loop (inner loop)
-                  cv.endi     0, store_result   # Set the end address for the column loop  
-                  cv.count    0, t6             # Set the number of interations for the column loop (#columns - 1) (needed for the first iteration)
-
+                  csrwi 0xa0, 1          
 row_loop:
-                  li          t3, 0           # sum = 0, clear the sum for this row
-                  la          t1, vector        # Reset pointer to vector for each row
+                  li    t3, 0            
+                  la    t1, vector        
                   
 col_loop:
-                  cv.lw       t4, (t0), 4     # Load matrix[i][j] into t10 (increment t9 by 4)
+                  cv.lw       t4, (t0), 4       
                   
-                  cv.lw       t5, (t1), 4     # Load vector[j] into t11
+                  cv.lw       t5, (t1), 4       
 
-                  cv.sdotup.b t3, t4, t5        # sum += matrix[i][j] * vector[j]
+                  cv.sdotup.b t3, t4, t5     
 
 store_result:
-                  cv.count 0, t6                # Set the number of interations for the column loop (#columns - 1)
-                                                # This instruction could be placed only in the row loop, appearing only once in the code.
-                                                # However, it is placed also in the init section because of the following hwlp contraint:
-                                                # "When both loops are nested, at least 1 instruction should be present between last 
-                                                # innermost HWLoop (must be #0) instruction and last outermost HWLoop (must be #1) instruction. 
-                                                # In other words the End address of the outermost HWLoop must be at least 8 bytes further than
-                                                # the End address of the innermost HWLoop (HWLoop[1].endaddress >= HWLoop[0].endaddress + 8)" 
-
-                  cv.sw     t3, (t2), 4       # Store the sum in result[i]
+                  cv.sb     t3, (t2), 1   
+                  cv.counti 0, MATRIX_COLS                 
 
 done:
-                  ### Just for debugging ###
-                  la   t2, result
-                  lw   t4, 0(t2)  
-                  addi t2, t2, 4
-                  lw   t5, 0(t2)  
-                  addi t2, t2, 4
-                  lw   t6, 0(t2)  
-                  ##########################
+                  la t0, result 
+                  li t1, VECTOR_ELEMENTS
+                  li t2, 0 
 
-                  j fast_exit              # Exit the program
+load_loop:
+                  bge  t2, t1, fast_exit
+                  lbu  t4, 0(t0)
+                  addi t0, t0, 1
+                  
+                  addi t2, t2, 1
+                  j load_loop 
                   
 
 #Start: Extracted from riscv_compliance_tests/riscv_test.h

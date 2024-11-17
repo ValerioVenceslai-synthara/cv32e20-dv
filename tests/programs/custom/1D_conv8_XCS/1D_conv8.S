@@ -7,19 +7,23 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ MATRIX_ELEMENTS, 64
-.equ MAX_VALUE, 256
-.equ MATRIX_ITERATIONS, 0
-.equ WINDOW_ITERATIONS, 62 #-1
-.equ SHIFT_AMT, 6
-.equ RESULT_LENGTH, 1
+.equ SIGNAL_LENGTH,
+.equ KERNEL_LENGHT,
+.equ MAX_VALUE,
+.equ SIGNAL_ITERATIONS,
+.equ RESULT_LENGTH,
+
 
 .section .data
-matrix:
-    .space 1024
+signal:
+    .space ???
+
+kernel:
+    .space ???
 
 result:
-    .space 16   
+    .space ???
+
 
 .section .text.start
 .globl _start
@@ -89,56 +93,76 @@ init:
                   la x12, user_stack_end
 
 main:         
-                  la t0, matrix
-                  li t1, MATRIX_ELEMENTS
+                  la t0, signal
+                  li t1, SIGNAL_LENGTH
                   li t2, MAX_VALUE
                   li t3, 0 # value to store
-                  li a0, 0 # matrix element index
+                  li a0, 0 # signal element index
+                  li a1, 0 # kernel element index
 
-matrix_init:
-                  beq a0, t1, start_kernel
+                  li t4, KERNEL_LENGHT
+
+signal_init:
+                  beq a0, t1, kernel_init
                   sw t3, 0(t0)
                   addi t0, t0, 4
 
                   addi t3, t3, 1
-                  beq  t3, t2, reset
+                  beq  t3, t2, reset_signal_value
                   addi a0, a0, 1
-                  j matrix_init
+                  j signal_init
 
-reset:
+reset_signal_value:
                   li t3, 0
                   addi a0, a0, 1
-                  j matrix_init
+                  j signal_init
 
-start_kernel:         
-                  la t0, matrix     
-                  la t1, result    
-                  li t2, MATRIX_ITERATIONS     
-                  li t3, WINDOW_ITERATIONS    
+kernel_init:
+                  beq a1, t1, start_kernel
+                  sw t3, 0(t0)
+                  addi t0, t0, 4
 
-                  csrwi 0xa0, 3
+                  addi t3, t3, 1
+                  beq  t3, t2, reset_kernel_value:
+                  addi a1, a1, 1
+                  j signal_init
 
-                  cv.starti 1, matrix_loop       
+reset_kernel_value:
+                  li t3, 0
+                  addi a1, a1, 1
+                  j kernel_init
+
+start_kernel:
+                  la t0, signal
+                  la t1, SIGNAL_ITERATIONS
+                  la t5, kernel
+                  la a6, result
+
+                  csrwi 0xa0, 1
+
+                  cv.starti 1, signal_loop       
                   cv.endi   1, done           
-                  cv.count  1, t2   
+                  cv.count  1, t1   
 
-                  cv.starti 0, window_loop       
+                  cv.starti 0, kernel_loop       
                   cv.endi   0, store_result           
-                  cv.count  0, t3            
+                  cv.count  0, t4
 
-matrix_loop:
-                  li t5, 0
+signal_loop:
+                  li a5, 0
+kernel_loop:
+                  mv a3, t0
+                  cv.lw  a2, (a3), 4
+                  cv.lw  a4, (t5), 4
 
-window_loop:
-                  cv.lw t4, (t0), 4
-                  add t5, t5, t4
+                  cv.sdotup.b a5, a2 a4
+
 store_result:
-                  cv.lw t4, (t0), 4
-                  cv.addN t5, t5, t4, SHIFT_AMT
+                  cv.sw a5, (a6), 4
 
-                  cv.sw t5, (t1), 4
-                  cv.count  0, t3
-                    
+                  addi t0, t0, 4
+                  la t5, kernel
+
 done:
                   la t0, result 
                   li t1, RESULT_LENGTH
@@ -1169,4 +1193,3 @@ kernel_stack_start:
 .endr
 kernel_stack_end:
 .4byte 0x0
-

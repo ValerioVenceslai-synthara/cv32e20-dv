@@ -7,23 +7,20 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ MATRIX_ELEMENTS, 64
-.equ MAX_VALUE, 256
-.equ MATRIX_ITERATIONS, 0
-.equ WINDOW_ITERATIONS, 62 #-1
-.equ SHIFT_AMT, 6
-.equ RESULT_LENGTH, 1
+.equ VECTOR_ELEMENTS, 16
 
 .section .data
-matrix:
-    .space 1024
-
+vec1:
+    .space 64
+vec2:
+    .space 64
 result:
-    .space 16   
+    .space 64
 
 .section .text.start
 .globl _start
 .type _start, @function
+
 
 _start:
 
@@ -87,70 +84,65 @@ init:
                   li x30, 0x80000000
                   li x31, 0xf4b85b42
                   la x12, user_stack_end
-
 main:         
-                  la t0, matrix
-                  li t1, MATRIX_ELEMENTS
-                  li t2, MAX_VALUE
-                  li t3, 0 # value to store
-                  li a0, 0 # matrix element index
+                  la t0, vec1
+                  la t1, vec2
 
-matrix_init:
-                  beq a0, t1, start_kernel
-                  sw t3, 0(t0)
+                  la a0, 0 # loop index
+                  li t3, 10 # value to store
+                  li t4, VECTOR_ELEMENTS
+
+fill_vector:
+                  beq a0, t4, start_kernel
+                  sw t3, 0(t0)      
+                  sw t3, 0(t1)      
+                  addi t0, t0, 4    
+                  addi t1, t1, 4
+
+                  addi a0, a0, 1
+
+                  addi t3, t3, 1    
+                  j fill_vector    
+          
+
+start_kernel:
+                  la t0, vec1
+                  la t1, vec2
+                  la t2, result        
+
+                  li a0, 0 # loop index
+                  li t3, VECTOR_ELEMENTS
+
+sum_vector:
+                  bge a0, t3, done
+                  lw t4, 0(t0) 
+                  lw t5, 0(t1)     
+
                   addi t0, t0, 4
+                  addi t1, t1, 4
 
-                  addi t3, t3, 1
-                  beq  t3, t2, reset
-                  addi a0, a0, 1
-                  j matrix_init
+                  add  t6, t4, t5 
+                  addi t6, t6, 1
+                  srli t6, t6, 1 
 
-reset:
-                  li t3, 0
-                  addi a0, a0, 1
-                  j matrix_init
+                  sw t6, 0(t2)       
+                  addi t2, t2, 4   
 
-start_kernel:         
-                  la t0, matrix     
-                  la t1, result    
-                  li t2, MATRIX_ITERATIONS     
-                  li t3, WINDOW_ITERATIONS    
+                  addi a0, a0 , 1
+                  j sum_vector       
 
-                  csrwi 0xa0, 3
-
-                  cv.starti 1, matrix_loop       
-                  cv.endi   1, done           
-                  cv.count  1, t2   
-
-                  cv.starti 0, window_loop       
-                  cv.endi   0, store_result           
-                  cv.count  0, t3            
-
-matrix_loop:
-                  li t5, 0
-
-window_loop:
-                  cv.lw t4, (t0), 4
-                  add t5, t5, t4
-store_result:
-                  cv.lw t4, (t0), 4
-                  cv.addN t5, t5, t4, SHIFT_AMT
-
-                  cv.sw t5, (t1), 4
-                  cv.count  0, t3
-                    
 done:
                   la t0, result 
-                  li t1, RESULT_LENGTH
+                  li t1, VECTOR_ELEMENTS
                   li t2, 0 
 
 load_loop:
-                  bge t2, t1, fast_exit
+                  beq t2, t1, fast_exit
                   lw t4, 0(t0)
                   addi t0, t0, 4
                   
                   addi t2, t2, 1
-                  j load_loop
+                  j load_loop  
                   
 
 #Start: Extracted from riscv_compliance_tests/riscv_test.h
@@ -1169,4 +1161,3 @@ kernel_stack_start:
 .endr
 kernel_stack_end:
 .4byte 0x0
-

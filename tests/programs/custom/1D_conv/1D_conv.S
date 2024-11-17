@@ -7,16 +7,22 @@
 # BEGIN: gtumbush
 .include "user_define.h"
 
-.equ RESULT_LENGTH, 16 # M (8x8 matrix)   
+.equ SIGNAL_LENGTH, 11
+.equ KERNEL_LENGHT, 4
+.equ MAX_VALUE, 256
+.equ SIGNAL_ITERATIONS, 8 # SIGNAL_LENGTH - KERNEL_LENGHT + 1
+.equ RESULT_LENGTH, 8 #  = SIGNAL_ITERATIONS 
 
 .section .data
-signal:     .word 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 1, 3, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50
-kernel:     .word -1, 1
-signal_len: .word 50
-kernel_len: .word 2
+signal:
+    .space 44
 
-result: 
-    .space 196    
+kernel:
+    .space 16
+
+result:
+    .space 32
+
 
 .section .text.start
 .globl _start
@@ -86,69 +92,94 @@ init:
                   la x12, user_stack_end
 
 main:         
+                  la t0, signal
+                  la t6, kernel
+                  li t1, SIGNAL_LENGTH
+                  li t2, MAX_VALUE
+                  li t3, 0 # signal value to store
+                  li t5, 0 # kernel value to store
+                  li a0, 0 # signal element index
+                  li a1, 0 # kernel element index
 
-                  la   t0, signal
-                  la   t1, kernel 
-                  la   t2, result
+                  li t4, KERNEL_LENGHT
 
-                  lw   t3, signal_len
-                  lw   t4, kernel_len # kernel length
+signal_init:
+                  beq a0, t1, kernel_init
+                  sw t3, 0(t0)
+                  addi t0, t0, 4
 
-                  sub  t3, t3, t4  
-                  addi t3, t3, 1      # result length    
+                  addi t3, t3, 1
+                  beq  t3, t2, reset_signal_value
+                  addi a0, a0, 1
+                  j signal_init
 
-                  li   a0, 0          # signal element index
+reset_signal_value:
+                  li t3, 0
+                  addi a0, a0, 1
+                  j signal_init
 
-signal_element_loop:
+kernel_init:
+                  beq a1, t4, start_kernel
+                  sw t5, 0(t6)
+                  addi t6, t6, 4
 
-                  beq  a0, t3, done
+                  addi t5, t5, 1
+                  beq  t5, t2, reset_kernel_value
+                  addi a1, a1, 1
+                  j kernel_init
 
-                  la   t1, kernel    # kernel base address
-                  li   a1, 0         # kernel index
-                  li   t5, 0         # accumulator
+reset_kernel_value:
+                  li t3, 0
+                  addi a1, a1, 1
+                  j kernel_init
+
+start_kernel:
+                  la t0, signal
+                  la t1, SIGNAL_ITERATIONS
+                  la t5, kernel
+                  la a6, result
+                  li a0, 0 # signal element index
+
+signal_loop:
+                  beq a0, t1, done
+                  li a1, 0 # kernel element index
+                  li a5, 0
+                  mv a3, t0
 
 kernel_loop:
+                  beq a1, t4, store_result
+                  lw a2, 0(a3)
+                  lw a4, 0(t5)
+                  addi a3, a3, 4
+                  addi t5, t5, 4
 
-                  beq  a1, t4, store_result
+                  mul a4, a2, a4
+                  add a5, a5, a4
 
-                  lw   a2, 0(t0)
-                  lw   a3, 0(t1)
-
-                  mul  a4, a2, a3
-                  add  t5, t5, a4
-
-                  addi t0, t0, 4
-                  addi t1, t1, 4
-
-                  addi a1, a1, 1
-
+                  add a1, a1, 1
                   j kernel_loop
 
 store_result:
-                  sw   t5, 0(t2)
-                  addi t2, t2, 4
+                  sw a5, 0(a6)
+                  addi a6, a6, 4
 
-                  la   t0, signal
-
+                  addi t0, t0, 4
                   addi a0, a0, 1
+                  la t5, kernel
+                  j signal_loop
 
-                  slli t5, a0, 2
-
-                  add  t0, t0, t5
-
-                  j signal_element_loop
-                  
 done:
-                  ### Just for debugging ###
-                  la   t2, result
-                  lw   t4, 0(t2)  
-                  addi t2, t2, 4
-                  lw   t5, 0(t2)  
-                  addi t2, t2, 4
-                  lw   t6, 0(t2)  
-                  ##########################
+                  la t0, result 
+                  li t1, RESULT_LENGTH
+                  li t2, 0 
 
-                  j fast_exit              # Exit the program
+load_loop:
+                  bge t2, t1, fast_exit
+                  lw t4, 0(t0)
+                  addi t0, t0, 4
+                  
+                  addi t2, t2, 1
+                  j load_loop
                   
 
 #Start: Extracted from riscv_compliance_tests/riscv_test.h
