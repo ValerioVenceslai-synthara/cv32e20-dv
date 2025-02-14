@@ -155,8 +155,6 @@ main:             li         s0, 0x0 #start riscv_int_numeric_corner_stream_39
                   nop
                   mul        t1, s11, s6
                   li         t2, 0x8000010
-                  cv.lw      t3, (t2), 0x2
-                  #cv.mac     t2, t3, t5
                   auipc      t6, 688967
                   nop
                   mulhsu     s1, t1, a6
